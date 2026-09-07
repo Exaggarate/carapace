@@ -1,7 +1,21 @@
 # our-fork/ISSUES.md — Upstream Issue Tracker
 
 Machine-refreshed triage of open upstream issues. Status: `open` → `queued` → `fixed` / `wontfix(reason)` / `upstream-tracked`.
-Seed snapshot: 2026-09-07 (fresh P0/P1 first). Full enumeration via label-partitioned search API runs in the sync job.
+Full enumeration: 2026-09-07 — **3,951 open issues** (list API, 64 pages) → machine dataset [issues-full.json](issues-full.json), refresh via `scripts/enumerate-issues.sh`.
+
+| Priority | Count | | Impact (top) | Count |
+|---|---|---|---|---|
+| P0 | 111 | | ux-friction | 893 |
+| P1 | 949 | | security | 883 |
+| P2 | 2,070 | | session-state | 859 |
+| P3 | 774 | | other | 693 |
+| unlabeled | 47 | | auth-provider | 517 |
+| | | | message-loss | 492 |
+| | | | crash-loop | 161 |
+| | | | data-loss | 107 |
+
+Ratings: diamond-lobster 1,922 · off-meta-tidepool 1,021 · silver-shellfish 520 · platinum-hermit 317 · gold-shrimp 102 · unranked-krab 16.
+Oldest open: #6599 (2026-02-01, /models test-fallback feature). Seed snapshot below (fresh P0/P1 first).
 
 | # | Title | Pri | Impact | Rating | Status |
 |---|-------|-----|--------|--------|--------|
