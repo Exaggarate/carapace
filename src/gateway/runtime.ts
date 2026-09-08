@@ -26,6 +26,7 @@ import { ApiChannel } from "./channels/api.js";
 import { DiscordChannel, type DiscordChannelOptions } from "./channels/discord.js";
 import { TelegramChannel, type OffsetPersistence, type TelegramChannelOptions } from "./channels/telegram.js";
 import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler, type SessionDirectory } from "./channels/types.js";
+import { type ChannelCommandServices } from "./commands.js";
 import { mountDashboardRoutes } from "./dashboard.js";
 import { mountPluginRoutes, scanPlugins } from "./plugins.js";
 import { WishlistService } from "./wishlist.js";
@@ -288,14 +289,26 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
     memory: agent.memory,
   });
 
+  // Shared command layer (M11): /status uptime + /skills + /automations services.
+  const commandServices: ChannelCommandServices = {
+    startedAtMs: Date.now(),
+    skills: options.skills ?? null,
+    automations: { list: () => store.listAutomations() },
+  };
+
   const channels: ChannelAdapter[] = [
     new ApiChannel(config, agent.sessions),
     new TelegramChannel(config, {
       sessions: deletableSessions,
       offsetStore: channelStateAdapter(store),
+      commands: commandServices,
       ...options.telegramOptions,
     }),
-    new DiscordChannel(config, options.discordOptions),
+    new DiscordChannel(config, {
+      sessions: deletableSessions,
+      commands: commandServices,
+      ...options.discordOptions,
+    }),
   ];
 
   // Completion routing (#27445): when agent.announceTarget points at a different

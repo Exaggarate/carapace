@@ -13,7 +13,9 @@
 // portal or guild message content arrives empty (see README + docs/index.md).
 
 import { describeSecretValue, resolveSecret, type CarapaceConfig, type DiscordChannelConfig } from "../../config.js";
-import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler } from "./types.js";
+import { VERSION } from "../../version.js";
+import { handleSlashCommand, type ChannelCommandServices, type CommandContext } from "../commands.js";
+import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler, type SessionDirectory } from "./types.js";
 
 const DEFAULT_GATEWAY_URL = "wss://gateway.discord.dev/?v=10&encoding=json";
 const DEFAULT_REST_BASE = "https://discord.com/api/v10";
@@ -85,6 +87,10 @@ export interface DiscordChannelOptions {
   gatewayUrl?: string;
   /** Test seam: REST base override (mock server). */
   restBase?: string;
+  /** Session directory for /sessions and /reset (wired by the runtime, M11). */
+  sessions?: SessionDirectory;
+  /** Command-layer services (M11): /status uptime, /skills, /automations. */
+  commands?: ChannelCommandServices;
 }
 
 interface GatewayPacket {
@@ -221,6 +227,9 @@ export class DiscordChannel implements ChannelAdapter {
   private readonly restBase: string;
   private readonly fetchImpl: typeof fetch;
   private readonly webSocketFactory: DiscordWebSocketFactory;
+  /** Shared command layer (M11): sessions + /status, /skills, /automations services. */
+  private readonly sessionDirectory: SessionDirectory | null;
+  private readonly commandServices: ChannelCommandServices;
 
   private token: string | null = null;
   private sender: DiscordRestSender | null = null;
@@ -239,7 +248,7 @@ export class DiscordChannel implements ChannelAdapter {
   private startWaiter: { resolve: () => void; reject: (error: Error) => void } | null = null;
   private startDeadline: unknown = null;
 
-  constructor(config: CarapaceConfig, options: DiscordChannelOptions = {}) {
+  constructor(private readonly config: CarapaceConfig, options: DiscordChannelOptions = {}) {
     // Hand-built configs (tests) may omit channels.discord entirely.
     this.shape =
       config.channels?.discord ?? { enabled: false, botToken: { env: "CARAPACE_DISCORD_TOKEN" } };
@@ -247,6 +256,23 @@ export class DiscordChannel implements ChannelAdapter {
     this.restBase = options.restBase ?? DEFAULT_REST_BASE;
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.webSocketFactory = options.webSocketFactory ?? ((url) => new WebSocket(url) as unknown as DiscordWebSocket);
+    this.sessionDirectory = options.sessions ?? null;
+    this.commandServices = options.commands ?? { startedAtMs: Date.now() };
+  }
+
+  /** Shared command context for the M11 command layer. */
+  private commandContext(chatId: string, senderId: string): CommandContext {
+    return {
+      channel: "discord",
+      chatId,
+      senderId,
+      version: VERSION,
+      startedAtMs: this.commandServices.startedAtMs,
+      config: this.config,
+      sessions: this.sessionDirectory,
+      skills: this.commandServices.skills ?? null,
+      automations: this.commandServices.automations ?? null,
+    };
   }
 
   isConfigured(): boolean {
@@ -542,6 +568,17 @@ export class DiscordChannel implements ChannelAdapter {
     const content = data.content;
     if (!isText(authorId) || !isText(chatId) || !isText(content)) return;
     if (content.trim() === "") return; // whitespace-only chatter
+    // M11: slash commands are answered in-channel via the shared command layer —
+    // no agent turn, no busy queue; unknown commands get the friendly notice.
+    if (content.startsWith("/")) {
+      const outcome = await handleSlashCommand(content, this.commandContext(chatId, authorId));
+      if (outcome !== null) {
+        await this.sendChunks(chatId, outcome.text).catch((error: unknown) =>
+          console.error(`[discord] command reply delivery failed: ${(error as Error).message}`),
+        );
+        return;
+      }
+    }
     const handler = this.messageHandler;
     if (handler === null) return;
     const message: ChannelMessage = {

@@ -16,6 +16,12 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { describeSecretValue, expandTilde, resolveSecret, type CarapaceConfig } from "../../config.js";
+import { VERSION } from "../../version.js";
+import {
+  handleSlashCommand,
+  type ChannelCommandServices,
+  type CommandContext,
+} from "../commands.js";
 import { markdownToTelegramHtml, splitTelegramText, TELEGRAM_MESSAGE_LIMIT } from "../format.js";
 import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler, type SessionDirectory } from "./types.js";
 
@@ -37,11 +43,6 @@ const PENDING_DRAIN_MS = 10_000;
 /** Default reaction emojis for received/done acknowledgments (#8508); "" disables. */
 const DEFAULT_ACK_EMOJI = "👀";
 const DEFAULT_DONE_EMOJI = "✅";
-
-const WELCOME_TEXT =
-  "🐢 Carapace is online.\n\n" +
-  "Send me any message — text, photos, documents or voice — and I'll answer through the agent loop (tools included).\n" +
-  "Commands:\n/id — show this chat's and your sender id\n/sessions — list active sessions\n/reset — wipe this chat's session history\n/help — this text";
 
 export class TelegramApiError extends Error {
   constructor(
@@ -242,16 +243,6 @@ function mediaFileName(item: TelegramMediaItem, telegramPath: string): string {
   return `doc_${item.fileUniqueId}_${sanitizeMediaFileName(original, "file.bin")}`;
 }
 
-function formatAge(ms: number): string {
-  const seconds = Math.max(1, Math.floor(ms / 1000));
-  if (seconds < 60) return `${seconds}s ago`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
-}
-
 export interface TelegramChannelOptions {
   log?: (line: string) => void;
   /** Test seam: replaces fetch for Bot API calls and file downloads. */
@@ -260,6 +251,8 @@ export interface TelegramChannelOptions {
   sessions?: SessionDirectory;
   /** Offset persistence for restart-safe update processing (wired by the runtime). */
   offsetStore?: OffsetPersistence;
+  /** Command-layer services (M11): /status uptime, /skills, /automations — wired by the runtime. */
+  commands?: ChannelCommandServices;
 }
 
 /** Minimal persistence for the last contiguously processed update id. */
@@ -294,6 +287,8 @@ export class TelegramChannel implements ChannelAdapter {
   private readonly fetchImpl: (input: string, init?: RequestInit) => Promise<Response>;
   private readonly sessions: SessionDirectory | null;
   private readonly offsetStore: OffsetPersistence | null;
+  /** Shared command-layer services (M11): /status uptime, /skills, /automations. */
+  private readonly commandServices: ChannelCommandServices;
   /** Last contiguously processed update id (-1 before anything is processed). */
   private processedThrough = -1;
   /** True once the frontier has been seeded for this process lifetime. */
@@ -314,6 +309,24 @@ export class TelegramChannel implements ChannelAdapter {
     this.fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
     this.sessions = options.sessions ?? null;
     this.offsetStore = options.offsetStore ?? null;
+    this.commandServices = options.commands ?? { startedAtMs: Date.now() };
+  }
+
+  /** Shared command context for the M11 command layer. */
+  private commandContext(chatId: string, senderId: string, username: string | undefined): CommandContext {
+    return {
+      channel: "telegram",
+      chatId,
+      senderId,
+      username,
+      version: VERSION,
+      startedAtMs: this.commandServices.startedAtMs,
+      config: this.config,
+      sessions: this.sessions,
+      skills: this.commandServices.skills ?? null,
+      automations: this.commandServices.automations ?? null,
+      startMessage: this.config.channels.telegram.startMessage,
+    };
   }
 
   /** Where inbound media is saved (lazy default so hand-built configs still work). */
@@ -737,23 +750,22 @@ export class TelegramChannel implements ChannelAdapter {
 
     if (rawText.startsWith("/")) {
       const command = rawText.split(/[\s@]/)[0] ?? rawText;
-      if (command === "/start" || command === "/help") {
-        await replyVia(WELCOME_TEXT);
-        return;
-      }
       if (command === "/id") {
         await replyVia(`chat id: ${chatId}\nsender id: ${senderId}${username ? `\nusername: @${username}` : ""}`);
-        return;
-      }
-      if (command === "/sessions") {
-        await replyVia(this.sessionsText());
         return;
       }
       if (command === "/reset") {
         await this.resetSession(chatId, business);
         return;
       }
-      // Unknown slash commands fall through to the agent like any other text.
+      // /start /help /status /sessions /skills /automations — the shared command
+      // layer (M11); unknown commands get its friendly notice instead of reaching
+      // the agent as a bare "/…" token.
+      const outcome = await handleSlashCommand(rawText, this.commandContext(chatId, senderId, username));
+      if (outcome !== null) {
+        await replyVia(outcome.text);
+        return;
+      }
     }
 
     const mediaText = rawText === "" ? await this.collectMedia(message) : null;
@@ -883,21 +895,6 @@ export class TelegramChannel implements ChannelAdapter {
         ? "🧹 Session reset — this chat's history is cleared; your next message starts a fresh conversation."
         : "🧹 Session reset — nothing to clear; your next message starts a fresh conversation.",
     ).catch(() => undefined);
-  }
-
-  /** /sessions — the ten most recently active sessions with message counts. */
-  private sessionsText(): string {
-    const directory = this.sessions;
-    if (directory === null) {
-      return "Session store unavailable — /sessions needs the full gateway runtime.";
-    }
-    const sessions = directory.list(10);
-    if (sessions.length === 0) return "No sessions yet — send me a message to start one.";
-    const lines = sessions.map(
-      (session) =>
-        `${session.id} · ${directory.countMessages(session.id)} msg · updated ${formatAge(Date.now() - session.updatedAt)}`,
-    );
-    return ["📚 Sessions (10 most recent):", ...lines].join("\n");
   }
 
   private isSenderAllowed(senderId: string, username: string | undefined): boolean {

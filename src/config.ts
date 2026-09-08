@@ -57,6 +57,11 @@ export interface TelegramChannelConfig {
   ackEmoji?: string;
   /** Reaction emoji set when the turn for that message completed (#8508). */
   doneEmoji?: string;
+  /**
+   * Config-driven /start welcome (M11). Absent = the crafted default in
+   * gateway/commands.ts. Multi-line markdown; bold via ** pairs.
+   */
+  startMessage?: string;
 }
 
 export interface ApiChannelConfig {
@@ -402,6 +407,22 @@ function readString(
   return raw;
 }
 
+/** Optional string key: absent stays absent; present must be a non-empty string. */
+function readOptionalString(
+  obj: Record<string, unknown>,
+  key: string,
+  label: string,
+  errors: string[],
+): string | undefined {
+  const raw = obj[key];
+  if (raw === undefined) return undefined;
+  if (typeof raw !== "string" || raw.trim() === "") {
+    errors.push(`${label}.${key} must be a non-empty string when present`);
+    return undefined;
+  }
+  return raw;
+}
+
 /** Steer mode (#48003): "inject" | "queue" — anything else falls back to the default. */
 function readSteerMode(obj: Record<string, unknown>, fallback: "inject" | "queue"): "inject" | "queue" {
   const raw = obj.steerMode;
@@ -576,6 +597,7 @@ export function validateConfig(raw: unknown): ValidationResult {
     errors,
     readSecretValue(telegramRaw, "token", "channels.telegram", errors, defaults.channels.telegram.botToken),
   );
+  const startMessage = readOptionalString(telegramRaw, "startMessage", "channels.telegram", errors);
   const channels: ChannelsConfig = {
     telegram: {
       enabled: readBoolean(telegramRaw, "enabled", "channels.telegram", errors, defaults.channels.telegram.enabled),
@@ -609,6 +631,7 @@ export function validateConfig(raw: unknown): ValidationResult {
         errors,
         defaults.channels.telegram.doneEmoji ?? "✅",
       ),
+      ...(startMessage === undefined ? {} : { startMessage }),
     },
     api: { enabled: readBoolean(apiRaw, "enabled", "channels.api", errors, defaults.channels.api.enabled) },
     discord: {
