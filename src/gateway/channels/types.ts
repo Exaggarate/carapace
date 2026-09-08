@@ -10,6 +10,12 @@ export interface ChannelMessage {
   chatId: string;
   text: string;
   receivedAt: number;
+  /**
+   * Session/busy-queue override for special chat surfaces — Telegram Business
+   * chats use "telegram:business:<chatId>" so their conversations stay separate
+   * from direct bot chats (#20786). Absent = "<channel>:<chatId>".
+   */
+  sessionKey?: string;
 }
 
 export interface ChannelReply {

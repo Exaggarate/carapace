@@ -7,6 +7,11 @@
 // channels.telegram.mediaDir and handed to the agent as context paths; captions
 // ride along as the message text. getUpdates offsets are persisted through an
 // OffsetPersistence store so a restart resumes exactly where processing stopped.
+// M4: Telegram Business support (#20786) — business_connection updates are
+// remembered (persisted via the same channel-state store so business chats survive
+// restarts), business_message updates are routed through the agent loop with
+// business context and their own sessions, and replies go out via sendMessage with
+// business_connection_id on behalf of the connected business account.
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
@@ -25,6 +30,8 @@ const DOWNLOAD_TIMEOUT_MS = 60_000;
 const DEFAULT_MEDIA_DIR = "~/.carapace/workspace/media";
 /** channel_state key holding the last contiguously processed update id. */
 const OFFSET_KEY = "telegram:update_offset";
+/** channel_state key holding the serialized business-connection map (#20786). */
+const BUSINESS_CONNECTIONS_KEY = "telegram:business_connections";
 /** How long stop() waits for in-flight updates before giving up (best effort). */
 const PENDING_DRAIN_MS = 10_000;
 
@@ -90,9 +97,42 @@ interface TelegramVoice {
   duration?: number;
 }
 
+interface TelegramBusinessUser {
+  id?: number;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+}
+
+/** Shape of a business_connection update's payload (#20786). */
+interface TelegramBusinessConnection {
+  id?: string;
+  user_chat_id?: number;
+  date?: number;
+  can_reply?: boolean;
+  is_enabled?: boolean;
+  user?: TelegramBusinessUser;
+}
+
+interface TelegramMessage {
+  message_id?: number;
+  from?: TelegramUser;
+  chat?: TelegramChat;
+  text?: string;
+  caption?: string;
+  date?: number;
+  photo?: TelegramPhotoSize[];
+  document?: TelegramDocument;
+  voice?: TelegramVoice;
+  /** Present on business_message payloads — which connection delivered it. */
+  business_connection_id?: string;
+}
+
 interface TelegramUpdate {
   update_id: number;
   message?: TelegramMessage;
+  business_message?: TelegramMessage;
+  business_connection?: TelegramBusinessConnection;
 }
 
 /** One downloadable inbound attachment, parsed from a Telegram message. */
@@ -225,6 +265,21 @@ export interface OffsetPersistence {
   set(key: string, value: string): void;
 }
 
+/** Active business connection resolved for one inbound business_message (#20786). */
+export interface TelegramBusinessContext {
+  connectionId: string;
+  /** Human-readable label of the business account the bot replies on behalf of. */
+  label: string;
+}
+
+/** Serialized shape of a remembered business connection (channel-state JSON). */
+interface StoredBusinessConnection {
+  userChatId: string;
+  canReply: boolean;
+  isEnabled: boolean;
+  label: string;
+}
+
 export class TelegramChannel implements ChannelAdapter {
   readonly name = "telegram";
 
@@ -243,6 +298,10 @@ export class TelegramChannel implements ChannelAdapter {
   private readonly completedIds = new Set<number>();
   private readonly inFlightIds = new Set<number>();
   private readonly pendingUpdates = new Set<Promise<void>>();
+  /** Known business connections by connection id (#20786); restored lazily/at start. */
+  private readonly businessConnections = new Map<string, StoredBusinessConnection>();
+  /** Guard so the persisted connection map is restored from channel state exactly once. */
+  private businessConnectionsRestored = false;
 
   constructor(
     private readonly config: CarapaceConfig,
@@ -272,7 +331,9 @@ export class TelegramChannel implements ChannelAdapter {
     const bot = this.botUsername === null ? "" : `, bot=@${this.botUsername}`;
     return `enabled=${enabled}, botToken=${describeSecretValue(botToken)}, resolved=${
       this.isConfigured() ? "yes" : "no"
-    }, mode=long-poll, media=${this.mediaDir()}${bot}`;
+    }, mode=long-poll, business=${this.config.channels.telegram.business ? "on" : "off"}, media=${
+      this.mediaDir()
+    }${bot}`;
   }
 
   onMessage(handler: MessageHandler): void {
@@ -292,6 +353,7 @@ export class TelegramChannel implements ChannelAdapter {
     const me = (await this.call(token, "getMe", {})) as { username?: unknown };
     this.botUsername = typeof me.username === "string" ? me.username : null;
     this.restoreOffset();
+    this.ensureBusinessConnectionsRestored();
     this.running = true;
     this.pollAbort = new AbortController();
     void this.pollLoop(token);
@@ -309,7 +371,7 @@ export class TelegramChannel implements ChannelAdapter {
     await Promise.race([Promise.allSettled(pending), sleep(PENDING_DRAIN_MS)]);
   }
 
-  async send(chatId: string, text: string): Promise<void> {
+  async send(chatId: string, text: string, businessConnectionId: string | null = null): Promise<void> {
     const token = this.token();
     if (token === null) throw new Error("telegram bot token is not resolvable — cannot send");
     const chunks = splitForTelegram(text === "" ? "(empty reply)" : text);
@@ -318,6 +380,9 @@ export class TelegramChannel implements ChannelAdapter {
         chat_id: chatId,
         text: chunks[index],
         link_preview_options: { is_disabled: true },
+        // Business replies must carry the connection id to go out on the business
+        // account's behalf (#20786); plain sends omit it entirely.
+        ...(businessConnectionId === null ? {} : { business_connection_id: businessConnectionId }),
       });
       if (index < chunks.length - 1) await sleep(SEND_CHUNK_DELAY_MS);
     }
@@ -376,13 +441,14 @@ export class TelegramChannel implements ChannelAdapter {
       }
       const watchdog = setTimeout(() => controller.abort(), HTTP_TIMEOUT_MS + 5_000);
       try {
+        const pollStartedAt = Date.now();
         const updates = await this.call(
           token,
           "getUpdates",
           {
             ...(offset > 0 ? { offset } : {}),
             timeout: POLL_TIMEOUT_S,
-            allowed_updates: ["message"],
+            allowed_updates: ["message", "business_message", "business_connection"],
           },
           controller.signal,
         );
@@ -391,6 +457,12 @@ export class TelegramChannel implements ChannelAdapter {
         for (const update of list) {
           this.trackUpdate(update);
         }
+        // Floor fast polls: a getUpdates that returns instantly (mocked transport,
+        // aggressive proxy) must not spin the loop on pure microtasks — that starves
+        // timers entirely. Real long-polls hold for ~POLL_TIMEOUT_S regardless.
+        const floorMs = 250;
+        const elapsed = Date.now() - pollStartedAt;
+        if (elapsed < floorMs) await sleep(floorMs - elapsed);
       } catch (error) {
         if (!this.running) break;
         if (error instanceof TelegramApiError) {
@@ -436,15 +508,30 @@ export class TelegramChannel implements ChannelAdapter {
 
   /** Process one update end-to-end, then confirm it for restart-safety. Public for tests. */
   async processUpdate(update: TelegramUpdate): Promise<void> {
-    const message = update.message;
     this.ensureFrontierSeeded(update.update_id);
+    if (update.business_connection !== undefined) {
+      this.rememberBusinessConnection(update.business_connection);
+      this.markProcessed(update.update_id);
+      return;
+    }
+    const businessMessage = update.business_message;
+    const message = businessMessage ?? update.message;
     if (message === undefined || message.chat === undefined) {
       this.markProcessed(update.update_id);
       return;
     }
+    let business: TelegramBusinessContext | null = null;
+    if (businessMessage !== undefined) {
+      business = this.businessContextFor(businessMessage);
+      if (business === null) {
+        this.log("dropped business_message — no active business connection for it");
+        this.markProcessed(update.update_id);
+        return;
+      }
+    }
     // Per-chat ordering is the runtime busy gate's job; media downloads and
     // command replies may interleave safely.
-    await this.handleIncoming(message).catch((error: unknown) =>
+    await this.handleIncoming(message, business).catch((error: unknown) =>
       this.log(`update handling failed: ${(error as Error).message}`),
     );
     this.markProcessed(update.update_id);
@@ -479,65 +566,157 @@ export class TelegramChannel implements ChannelAdapter {
     }
   }
 
-  /** Process one inbound Telegram message end-to-end. Public for tests and reuse. */
-  async handleIncoming(message: TelegramMessage): Promise<void> {
+  /** Store a business_connection update and persist it so business chats survive restarts (#20786). */
+  private rememberBusinessConnection(raw: TelegramBusinessConnection): void {
+    const id = typeof raw.id === "string" && raw.id !== "" ? raw.id : "";
+    if (id === "") return;
+    const user = raw.user ?? {};
+    const names = [user.first_name, user.last_name].filter(
+      (value): value is string => typeof value === "string" && value.trim() !== "",
+    );
+    const label =
+      typeof user.username === "string" && user.username.trim() !== ""
+        ? `@${user.username}`
+        : names.length > 0
+          ? names.join(" ")
+          : "the connected business account";
+    const connection: StoredBusinessConnection = {
+      userChatId: typeof raw.user_chat_id === "number" ? String(raw.user_chat_id) : "",
+      canReply: raw.can_reply === true,
+      isEnabled: raw.is_enabled === true,
+      label,
+    };
+    this.businessConnections.set(id, connection);
+    this.persistBusinessConnections();
+    this.log(
+      `business connection ${id} (${label}): ${connection.isEnabled ? "enabled" : "disabled"}, can_reply=${connection.canReply}`,
+    );
+  }
+
+  /** Active connection for a business_message, or null when it must be dropped. */
+  private businessContextFor(message: TelegramMessage): TelegramBusinessContext | null {
+    const id = typeof message.business_connection_id === "string" ? message.business_connection_id : "";
+    if (id === "") return null;
+    this.ensureBusinessConnectionsRestored();
+    const connection = this.businessConnections.get(id);
+    if (connection === undefined || !connection.isEnabled || !connection.canReply) return null;
+    return { connectionId: id, label: connection.label };
+  }
+
+  /** Restore the persisted business-connection map once per process lifetime. */
+  private ensureBusinessConnectionsRestored(): void {
+    if (this.businessConnectionsRestored) return;
+    this.businessConnectionsRestored = true;
+    const stored = this.offsetStore?.get(BUSINESS_CONNECTIONS_KEY) ?? null;
+    if (stored === null) return;
+    try {
+      const parsed = JSON.parse(stored) as Record<string, StoredBusinessConnection>;
+      for (const [id, entry] of Object.entries(parsed)) {
+        if (entry === null || typeof entry !== "object" || typeof entry.label !== "string") continue;
+        this.businessConnections.set(id, {
+          userChatId: typeof entry.userChatId === "string" ? entry.userChatId : "",
+          canReply: entry.canReply === true,
+          isEnabled: entry.isEnabled === true,
+          label: entry.label,
+        });
+      }
+    } catch {
+      this.log("stored business connections unreadable — waiting for the next business_connection update");
+    }
+  }
+
+  /** Persist the business-connection map through the channel-state store. */
+  private persistBusinessConnections(): void {
+    if (this.offsetStore === null) return;
+    const snapshot: Record<string, StoredBusinessConnection> = {};
+    for (const [id, connection] of this.businessConnections) snapshot[id] = connection;
+    this.offsetStore.set(BUSINESS_CONNECTIONS_KEY, JSON.stringify(snapshot));
+  }
+
+  /**
+   * Process one inbound Telegram message end-to-end. Public for tests and reuse.
+   * `business` carries the resolved Telegram Business connection (#20786): replies
+   * go out with business_connection_id, the agent gets a context line naming the
+   * business account, and the chat keeps its own "telegram:business:<chatId>" session.
+   */
+  async handleIncoming(message: TelegramMessage, business: TelegramBusinessContext | null = null): Promise<void> {
     const chatId = message.chat === undefined ? "" : String(message.chat.id);
     if (chatId === "") return;
     const sender = message.from;
     const senderId = sender === undefined ? "unknown" : String(sender.id);
     const username = sender?.username;
 
-    if (!this.isSenderAllowed(senderId, username)) {
+    if (business !== null && !this.config.channels.telegram.business) {
+      this.log("ignored business_message — channels.telegram.business is disabled");
+      return;
+    }
+    // Business chats are authorized by their active business connection (the owner
+    // opted in when connecting the account), so allowedSenders applies to direct
+    // bot chats only.
+    if (business === null && !this.isSenderAllowed(senderId, username)) {
       this.log(`ignored message from unauthorized sender ${senderId} in chat ${chatId}`);
       return;
     }
+
+    const replyVia = (text: string): Promise<void> =>
+      business === null ? this.send(chatId, text) : this.send(chatId, text, business.connectionId);
 
     const rawText = typeof message.text === "string" ? message.text : "";
 
     if (rawText.startsWith("/")) {
       const command = rawText.split(/[\s@]/)[0] ?? rawText;
       if (command === "/start" || command === "/help") {
-        await this.send(chatId, WELCOME_TEXT);
+        await replyVia(WELCOME_TEXT);
         return;
       }
       if (command === "/id") {
-        await this.send(chatId, `chat id: ${chatId}\nsender id: ${senderId}${username ? `\nusername: @${username}` : ""}`);
+        await replyVia(`chat id: ${chatId}\nsender id: ${senderId}${username ? `\nusername: @${username}` : ""}`);
         return;
       }
       if (command === "/sessions") {
-        await this.send(chatId, this.sessionsText());
+        await replyVia(this.sessionsText());
         return;
       }
       if (command === "/reset") {
-        await this.resetSession(chatId);
+        await this.resetSession(chatId, business);
         return;
       }
       // Unknown slash commands fall through to the agent like any other text.
     }
 
     const mediaText = rawText === "" ? await this.collectMedia(message) : null;
-    const text = mediaText ?? rawText;
+    const baseText = mediaText ?? rawText;
 
-    if (text.trim() === "") {
-      await this.send(chatId, "I can only process text, photos, documents and voice messages for now.").catch(() => undefined);
+    if (baseText.trim() === "") {
+      await replyVia("I can only process text, photos, documents and voice messages for now.").catch(() => undefined);
       return;
     }
     if (this.handler === null) {
-      await this.send(chatId, "carapace is starting up — no message handler is attached yet.").catch(
-        () => undefined,
-      );
+      await replyVia("carapace is starting up — no message handler is attached yet.").catch(() => undefined);
       return;
     }
 
-    void this.sendChatAction(chatId);
-    const inbound: ChannelMessage = { channel: "telegram", senderId, chatId, text, receivedAt: Date.now() };
+    void this.sendChatAction(chatId, business === null ? null : business.connectionId);
+    // Business context rides along so the agent knows which account it answers for
+    // (#20786); the chat itself keeps a separate business session namespace.
+    const text =
+      business === null
+        ? baseText
+        : `[business] Replying on behalf of ${business.label} (Telegram Business chat).\n\n${baseText}`;
+    const inbound: ChannelMessage = {
+      channel: "telegram",
+      senderId,
+      chatId,
+      text,
+      receivedAt: Date.now(),
+      ...(business === null ? {} : { sessionKey: `telegram:business:${chatId}` }),
+    };
     let reply: ChannelReply | void;
     try {
       reply = await this.handler(inbound);
     } catch (error) {
       if (error instanceof BusyTurnError) {
-        await this.send(
-          chatId,
+        await replyVia(
           `⚠️ I'm still working on an earlier message and my queue for this chat is full (${error.queueLimit} waiting) — try again in a moment.`,
         ).catch(() => undefined);
         return;
@@ -545,7 +724,7 @@ export class TelegramChannel implements ChannelAdapter {
       throw error;
     }
     if (reply !== undefined && reply.text !== "") {
-      await this.send(chatId, reply.text);
+      await replyVia(reply.text);
     }
   }
 
@@ -617,14 +796,15 @@ export class TelegramChannel implements ChannelAdapter {
   }
 
   /** /reset — wipe this chat's session so the next message starts fresh. */
-  private async resetSession(chatId: string): Promise<void> {
+  private async resetSession(chatId: string, business: TelegramBusinessContext | null = null): Promise<void> {
+    const replyVia = (text: string): Promise<void> =>
+      business === null ? this.send(chatId, text) : this.send(chatId, text, business.connectionId);
     if (this.sessions === null) {
-      await this.send(chatId, "Session store unavailable — /reset needs the full gateway runtime.").catch(() => undefined);
+      await replyVia("Session store unavailable — /reset needs the full gateway runtime.").catch(() => undefined);
       return;
     }
-    const existed = this.sessions.delete(`telegram:${chatId}`);
-    await this.send(
-      chatId,
+    const existed = this.sessions.delete(business === null ? `telegram:${chatId}` : `telegram:business:${chatId}`);
+    await replyVia(
       existed
         ? "🧹 Session reset — this chat's history is cleared; your next message starts a fresh conversation."
         : "🧹 Session reset — nothing to clear; your next message starts a fresh conversation.",
@@ -659,11 +839,15 @@ export class TelegramChannel implements ChannelAdapter {
     return false;
   }
 
-  private async sendChatAction(chatId: string): Promise<void> {
+  private async sendChatAction(chatId: string, businessConnectionId: string | null = null): Promise<void> {
     const token = this.token();
     if (token === null) return;
     try {
-      await this.call(token, "sendChatAction", { chat_id: chatId, action: "typing" });
+      await this.call(token, "sendChatAction", {
+        chat_id: chatId,
+        action: "typing",
+        ...(businessConnectionId === null ? {} : { business_connection_id: businessConnectionId }),
+      });
     } catch {
       // Best effort — typing indicators must never break a reply.
     }

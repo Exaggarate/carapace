@@ -60,6 +60,12 @@ export function channelStateAdapter(store: CarapaceStore): OffsetPersistence {
   };
 }
 
+/** Session/busy-queue key: channel+chat unless the adapter supplies an override
+ * (Telegram Business chats keep separate sessions, #20786). */
+function sessionKeyOf(message: ChannelMessage): string {
+  return message.sessionKey ?? `${message.channel}:${message.chatId}`;
+}
+
 export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
   const { config } = options;
   const store = options.store ?? new CarapaceStore(config.storage.path);
@@ -109,7 +115,7 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
 
   // One session per channel chat; sessions persist across gateway restarts.
   const runTurn = async (message: ChannelMessage): Promise<ChannelReply> => {
-    const sessionId = `${message.channel}:${message.chatId}`;
+    const sessionId = sessionKeyOf(message);
     // Per-sender routing (#81271): first matching route scopes the toolset and/or model.
     const route = resolveSenderRoute(config, message);
     const result = await runAgentTurn(
@@ -183,7 +189,7 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
   };
 
   const handleMessage = (message: ChannelMessage): Promise<ChannelReply> => {
-    const key = `${message.channel}:${message.chatId}`;
+    const key = sessionKeyOf(message);
     return new Promise<ChannelReply>((resolve, reject) => {
       let queue = queues.get(key);
       if (queue === undefined) {

@@ -39,6 +39,13 @@ export interface TelegramChannelConfig {
   allowedSenders: string[];
   /** Where inbound photos/documents/voice are saved (tilde allowed). */
   mediaDir: string;
+  /**
+   * Telegram Business support (#20786): handle business_message/business_connection
+   * updates and reply on behalf of the connected business account. Default true —
+   * the Bot API only delivers those updates once an owner connects the bot via
+   * Telegram Business settings, so the toggle defaults on.
+   */
+  business: boolean;
 }
 
 export interface ApiChannelConfig {
@@ -222,6 +229,7 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
         botToken: { env: "CARAPACE_TELEGRAM_TOKEN" },
         allowedSenders: [],
         mediaDir: join(dir, "workspace", "media"),
+        business: true,
       },
       api: { enabled: true },
     },
@@ -421,6 +429,7 @@ export function validateConfig(raw: unknown): ValidationResult {
       mediaDir: expandTilde(
         readString(telegramRaw, "mediaDir", "channels.telegram", errors, defaults.channels.telegram.mediaDir),
       ),
+      business: readBoolean(telegramRaw, "business", "channels.telegram", errors, defaults.channels.telegram.business),
     },
     api: { enabled: readBoolean(apiRaw, "enabled", "channels.api", errors, defaults.channels.api.enabled) },
   };
