@@ -8,6 +8,7 @@ import { createBuiltinTools } from "../core/tools/builtins/index.js";
 import { SessionStore } from "../core/session.js";
 import { CarapaceStore } from "../storage/sqlite.js";
 import { ApiChannel } from "./channels/api.js";
+import { DiscordChannel, type DiscordChannelOptions } from "./channels/discord.js";
 import { TelegramChannel, type OffsetPersistence, type TelegramChannelOptions } from "./channels/telegram.js";
 import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler } from "./channels/types.js";
 import { mountDashboardRoutes } from "./dashboard.js";
@@ -22,6 +23,8 @@ export interface RuntimeOptions {
   store?: CarapaceStore;
   /** Test seam: options forwarded to the Telegram adapter (e.g. fetchImpl). */
   telegramOptions?: TelegramChannelOptions;
+  /** Test seam: options forwarded to the Discord adapter (e.g. fetchImpl/webSocketFactory). */
+  discordOptions?: DiscordChannelOptions;
   /** Test seam: provider factory for per-sender model overrides (#81271). */
   providerForModel?: (model: string) => ChatProvider;
 }
@@ -99,6 +102,7 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
       offsetStore: channelStateAdapter(store),
       ...options.telegramOptions,
     }),
+    new DiscordChannel(config, options.discordOptions),
   ];
 
   // Completion routing (#27445): when agent.announceTarget points at a different

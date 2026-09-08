@@ -144,6 +144,8 @@ declare module "node:crypto" {
 
 declare function setTimeout(handler: (...args: unknown[]) => void, timeout?: number, ...args: unknown[]): unknown;
 declare function clearTimeout(id: unknown): void;
+declare function setInterval(handler: (...args: unknown[]) => void, timeout?: number, ...args: unknown[]): unknown;
+declare function clearInterval(id: unknown): void;
 
 // --- fetch stack (Node >= 18 globals) ---
 
@@ -193,6 +195,17 @@ interface RequestInit {
 }
 
 declare function fetch(input: string | URL, init?: RequestInit): Promise<Response>;
+
+// --- WebSocket (Node >= 22 global; discord gateway) ---
+
+declare class WebSocket {
+  readonly readyState: number;
+  constructor(url: string);
+  send(data: string): void;
+  close(code?: number, reason?: string): void;
+  addEventListener(type: string, listener: (event: unknown) => void): void;
+  removeEventListener(type: string, listener: (event: unknown) => void): void;
+}
 
 // --- child processes ---
 

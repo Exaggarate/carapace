@@ -52,9 +52,16 @@ export interface ApiChannelConfig {
   enabled: boolean;
 }
 
+export interface DiscordChannelConfig {
+  enabled: boolean;
+  /** Bot token from the Discord developer portal. Accepts a SecretRef; resolved at runtime, never logged. */
+  botToken: SecretValue;
+}
+
 export interface ChannelsConfig {
   telegram: TelegramChannelConfig;
   api: ApiChannelConfig;
+  discord: DiscordChannelConfig;
 }
 
 /** Where turn-completion notices route instead of the origin chat (#27445). */
@@ -253,6 +260,7 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
         business: true,
       },
       api: { enabled: true },
+      discord: { enabled: false, botToken: { env: "CARAPACE_DISCORD_TOKEN" } },
     },
     agent: {
       systemPrompt: "You are Carapace, a helpful personal agent running on the owner's own hardware.",
@@ -432,6 +440,7 @@ export function validateConfig(raw: unknown): ValidationResult {
   const channelsRaw = asObjectOrEmpty(root.channels, "channels", errors);
   const telegramRaw = asObjectOrEmpty(channelsRaw.telegram, "channels.telegram", errors);
   const apiRaw = asObjectOrEmpty(channelsRaw.api, "channels.api", errors);
+  const discordRaw = asObjectOrEmpty(channelsRaw.discord, "channels.discord", errors);
   // M0 configs used `token`; keep accepting it as a fallback alias for botToken.
   const botToken = readSecretValue(
     telegramRaw,
@@ -457,6 +466,16 @@ export function validateConfig(raw: unknown): ValidationResult {
       business: readBoolean(telegramRaw, "business", "channels.telegram", errors, defaults.channels.telegram.business),
     },
     api: { enabled: readBoolean(apiRaw, "enabled", "channels.api", errors, defaults.channels.api.enabled) },
+    discord: {
+      enabled: readBoolean(discordRaw, "enabled", "channels.discord", errors, defaults.channels.discord.enabled),
+      botToken: readSecretValue(
+        discordRaw,
+        "botToken",
+        "channels.discord",
+        errors,
+        defaults.channels.discord.botToken,
+      ),
+    },
   };
 
   const llmRaw = asObjectOrEmpty(root.llm, "llm", errors);
@@ -726,6 +745,15 @@ function applyEnvOverrides(config: CarapaceConfig, warnings: string[]): void {
     const flag = parseEnvBoolean(`${ENV_PREFIX}API_ENABLED`, apiEnabled, warnings);
     if (flag !== null) config.channels.api.enabled = flag;
   }
+
+  const discordEnabled = env("DISCORD_ENABLED");
+  if (discordEnabled !== undefined) {
+    const flag = parseEnvBoolean(`${ENV_PREFIX}DISCORD_ENABLED`, discordEnabled, warnings);
+    if (flag !== null) config.channels.discord.enabled = flag;
+  }
+
+  const discordToken = env("DISCORD_TOKEN");
+  if (discordToken !== undefined) config.channels.discord.botToken = discordToken;
 }
 
 /**
