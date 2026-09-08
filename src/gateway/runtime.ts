@@ -25,6 +25,7 @@ import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelRe
 import { mountDashboardRoutes } from "./dashboard.js";
 import { mountPluginRoutes, scanPlugins } from "./plugins.js";
 import { RouteTable } from "./server.js";
+import { Scheduler } from "./scheduler.js";
 
 export interface RuntimeOptions {
   config: CarapaceConfig;
@@ -59,6 +60,8 @@ export interface GatewayRuntime {
   waitUntilIdle(timeoutMs?: number): Promise<boolean>;
   /** Close the underlying store (idempotent enough for tests and shutdown). */
   close(): void;
+  /** Automation scheduler (M8): built here, started/stopped by the CLI. Undefined when disabled. */
+  scheduler?: Scheduler;
 }
 
 const OPENAI_DEFAULT_BASE_URL = "https://api.openai.com/v1";
@@ -387,6 +390,14 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
     routes,
     handleMessage,
     waitUntilIdle,
+    // Automations (M8): the scheduler holds references to the store/agent/channels;
+    // the CLI starts it after the channels are up and stops it at shutdown.
+    scheduler: config.automations?.enabled === false ? undefined : new Scheduler({
+      store,
+      agent,
+      channels,
+      tickMs: config.automations?.tickMs ?? 30_000,
+    }),
     close: () => store.close(),
   };
 }

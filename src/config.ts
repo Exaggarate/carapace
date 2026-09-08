@@ -193,6 +193,14 @@ export interface UiConfig {
   pluginsDir?: string;
 }
 
+/** Automations/scheduler (M8): the gateway's due-job timer loop. */
+export interface AutomationsConfig {
+  /** Master switch; false removes the scheduler from the runtime entirely. */
+  enabled: boolean;
+  /** How often the scheduler wakes to look for due jobs (1000–3600000 ms). */
+  tickMs: number;
+}
+
 export interface CarapaceConfig {
   gateway: GatewayConfig;
   llm: LlmConfig;
@@ -204,6 +212,8 @@ export interface CarapaceConfig {
   storage: StorageConfig;
   /** Dashboard appearance (#28300); runtime consumers must tolerate hand-built configs without it. */
   ui: UiConfig;
+  /** Scheduled jobs (M8); runtime consumers must tolerate hand-built configs without it. */
+  automations: AutomationsConfig;
 }
 
 export interface LoadedConfig {
@@ -334,6 +344,10 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
     ui: {
       theme: "dark",
       themeFile: join(dir, "theme.css"),
+    },
+    automations: {
+      enabled: true,
+      tickMs: 30_000,
     },
   };
 }
@@ -492,7 +506,17 @@ export function validateConfig(raw: unknown): ValidationResult {
     return { config: defaults, errors: ["config root must be a JSON object"] };
   }
   const root = raw as Record<string, unknown>;
-  const knownSections = new Set(["gateway", "llm", "channels", "agent", "tools", "storage", "senders", "ui"]);;
+  const knownSections = new Set([
+    "gateway",
+    "llm",
+    "channels",
+    "agent",
+    "tools",
+    "storage",
+    "senders",
+    "ui",
+    "automations",
+  ]);
   for (const key of Object.keys(root)) {
     if (!knownSections.has(key)) errors.push(`unknown top-level section "${key}"`);
   }
@@ -794,7 +818,22 @@ export function validateConfig(raw: unknown): ValidationResult {
     }
   }
 
-  return { config: { gateway, llm, channels, agent, tools, senders, storage, ui }, errors };
+  // Automations (M8): scheduler enablement + tick cadence.
+  const automationsRaw = asObjectOrEmpty(root.automations, "automations", errors);
+  const automations: AutomationsConfig = {
+    enabled: readBoolean(automationsRaw, "enabled", "automations", errors, defaults.automations.enabled),
+    tickMs: readBoundedInt(
+      automationsRaw,
+      "tickMs",
+      "automations",
+      errors,
+      defaults.automations.tickMs,
+      1_000,
+      3_600_000,
+    ),
+  };
+
+  return { config: { gateway, llm, channels, agent, tools, senders, storage, ui, automations }, errors };
 }
 
 function parseEnvBoolean(name: string, raw: string, warnings: string[]): boolean | null {

@@ -2,6 +2,7 @@
 // carapace CLI. M0 commands: gateway | doctor | models | version | help.
 // No argument-parsing dependency — the surface is four words.
 
+import { randomUUID } from "node:crypto";
 import { mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -24,17 +25,20 @@ import { startGatewayServer } from "../gateway/server.js";
 import { createBuiltinToolRegistry } from "../core/tools/builtins/index.js";
 import { fileToolsDir, loadFileToolDefs } from "../core/tools/custom.js";
 import { probeProviderEndpoint, type ProviderProbeResult } from "../core/llm.js";
+import { nextRunMs, parseSchedule, ScheduleError } from "../core/schedule.js";
 import { carapaceSkillsDir, loadSkillsFromDir, SkillRegistry } from "../core/skills.js";
-import { CarapaceStore } from "../storage/sqlite.js";
+import { CarapaceStore, type AutomationRow } from "../storage/sqlite.js";
 import { VERSION } from "../version.js";
 
 const USAGE = `carapace v${VERSION} — independent multi-channel agent gateway
 
 Usage:
-  carapace gateway    start the gateway (LLM + tools + skills + channels + HTTP server)
-  carapace doctor     check node, config, directories, storage, llm, tools, skills, channels
+  carapace gateway    start the gateway (LLM + tools + skills + channels + automations + HTTP server)
+  carapace doctor     check node, config, directories, storage, llm, tools, skills, channels, scheduler
   carapace models     show the configured model/provider chain
   carapace skills     skills list | skills path <name> — installed skill playbooks
+  carapace automations  list | add (--at ISO | --every DURATION | --cron EXPR) --prompt TEXT --chat CHANNEL:CHATID
+                        remove <id|name> | run <id|name> — scheduled jobs (M8)
   carapace version    print the version
   carapace help       show this help
 
@@ -106,6 +110,11 @@ async function commandGateway(): Promise<number> {
       console.error(`   channel → ${channel.name}: failed to start (${(error as Error).message})`);
     }
   }
+  // Automations (M8): boot catch-up (missed one-shots fire once) + the tick loop.
+  if (runtime.scheduler !== undefined) {
+    runtime.scheduler.start();
+    console.log(`   automations → ${runtime.scheduler.describe()} (tick ${loaded.config.automations?.tickMs ?? 30_000}ms)`);
+  }
   console.log("   ready — press ctrl+c to stop");
 
   let shuttingDown = false;
@@ -116,6 +125,9 @@ async function commandGateway(): Promise<number> {
     shuttingDown = true;
     console.log(`\nreceived ${signal}, shutting down…`);
     void (async () => {
+      // Stop the scheduler first: no new fires; in-flight job turns get the
+      // bounded grace to finish (and deliver) before the channels go down.
+      await runtime.scheduler?.stop(SHUTDOWN_GRACE_MS);
       for (const channel of runtime.channels) {
         try {
           await channel.stop();
@@ -420,6 +432,32 @@ async function commandDoctor(): Promise<number> {
         `${skillScan.skills.length} skill(s) in ${skillsRoot}` +
         (skillScan.issues.length > 0 ? ` — ${skillScan.issues.join("; ")}` : ""),
     });
+
+    // Automations (M8): persisted jobs — counts, enabled, next due.
+    try {
+      const automationsStore = new CarapaceStore(config.storage.path);
+      const counts = automationsStore.automationCounts();
+      const next = automationsStore.nextDueAutomation();
+      const overdue = automationsStore.dueAutomations(Date.now()).length;
+      automationsStore.close();
+      const dueDetail =
+        next === null
+          ? "none scheduled"
+          : `next due "${next.name}" at ${new Date(next.nextRun ?? Date.now()).toISOString()}`;
+      results.push({
+        name: "scheduler",
+        status: "ok",
+        detail:
+          `${counts.total} automation(s) (${counts.enabled} enabled) — ${dueDetail}` +
+          (overdue > 0 ? ` — ${overdue} overdue, fire on the next tick` : ""),
+      });
+    } catch (error) {
+      results.push({
+        name: "scheduler",
+        status: "warn",
+        detail: `could not inspect automations: ${(error as Error).message}`,
+      });
+    }
   }
 
   const failed = results.filter((r) => r.status === "fail");
@@ -493,6 +531,263 @@ function commandSkills(argv: string[]): number {
   return 2;
 }
 
+// ── Automations (M8) ────────────────────────────────────────────────────────
+
+const AUTOMATIONS_USAGE = `usage:
+  carapace automations list
+  carapace automations add (--at ISO | --every DURATION | --cron "M H DOM MON DOW") \
+      --prompt TEXT --chat CHANNEL:CHATID [--channel CHANNEL] [--name NAME]
+  carapace automations remove <id|name>
+  carapace automations run <id|name>
+
+schedule kinds:
+  --at ISO          one-shot, ISO 8601 timestamp (or "YYYY-MM-DD HH:MM", server-local)
+  --every DURATION  fixed interval — 30s, 5m, 2h, 1d, or bare milliseconds
+  --cron EXPR       5-field crontab (minute hour day-of-month month day-of-week),
+                    minute granularity, server-local time; missed one-shots fire
+                    once on gateway boot`;
+
+/** Minimal --flag value parser (no external deps). */
+function parseFlags(argv: string[]): Map<string, string> {
+  const flags = new Map<string, string>();
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index] ?? "";
+    if (arg.startsWith("--") && arg.length > 2) {
+      flags.set(arg.slice(2), argv[index + 1] ?? "");
+      index += 1;
+    }
+  }
+  return flags;
+}
+
+function isoOrNull(ms: number | null): string {
+  return ms === null ? "never" : new Date(ms).toISOString();
+}
+
+/** Resolve an automation by exact id, exact name, or unique id prefix. */
+function resolveAutomation(store: CarapaceStore, key: string): { job: AutomationRow | null; ambiguous: number } {
+  const byId = store.getAutomation(key);
+  if (byId !== null) return { job: byId, ambiguous: 0 };
+  const byName = store.findAutomationByName(key);
+  if (byName !== null) return { job: byName, ambiguous: 0 };
+  const byPrefix = store.findAutomationByIdPrefix(key);
+  return { job: byPrefix.match, ambiguous: byPrefix.candidates };
+}
+
+async function commandAutomations(argv: string[]): Promise<number> {
+  const sub = argv[0] ?? "list";
+  const rest = argv.slice(1);
+  switch (sub) {
+    case "list":
+      return commandAutomationsList();
+    case "add":
+      return commandAutomationsAdd(rest);
+    case "remove":
+      return commandAutomationsRemove(rest);
+    case "run":
+      return await commandAutomationsRun(rest);
+    default:
+      console.error(`unknown automations subcommand: "${sub}"`);
+      console.log(AUTOMATIONS_USAGE);
+      return 2;
+  }
+}
+
+function commandAutomationsList(): number {
+  const loaded = loadOrReport();
+  if (loaded === null) return 1;
+  const store = new CarapaceStore(loaded.config.storage.path);
+  try {
+    const jobs = store.listAutomations();
+    if (jobs.length === 0) {
+      console.log(
+        'no automations — add one with: carapace automations add --every 10m --prompt "..." --chat telegram:12345',
+      );
+      return 0;
+    }
+    console.log(`automations (${jobs.length}) — ${loaded.config.storage.path}`);
+    for (const job of jobs) {
+      console.log(
+        `  ${job.id}  ${job.name}\n` +
+          `    schedule: ${job.kind} ${job.spec}\n` +
+          `    target:   ${job.channel}:${job.chatId}\n` +
+          `    enabled:  ${job.enabled ? "yes" : "no"}  state: ${job.state}\n` +
+          `    lastRun:  ${isoOrNull(job.lastRun)}\n` +
+          `    nextRun:  ${job.nextRun === null ? "-" : new Date(job.nextRun).toISOString()}\n` +
+          `    prompt:   ${job.prompt.length > 80 ? `${job.prompt.slice(0, 80)}…` : job.prompt}` +
+          (job.lastError !== null ? `\n    lastError: ${job.lastError}` : ""),
+      );
+    }
+    return 0;
+  } finally {
+    store.close();
+  }
+}
+
+function commandAutomationsAdd(argv: string[]): number {
+  const loaded = loadOrReport();
+  if (loaded === null) return 1;
+  const flags = parseFlags(argv);
+  const at = flags.get("at");
+  const every = flags.get("every");
+  const cron = flags.get("cron");
+  if ([at, every, cron].filter((value) => value !== undefined).length !== 1) {
+    console.error("exactly one of --at, --every, --cron is required");
+    console.log(AUTOMATIONS_USAGE);
+    return 2;
+  }
+  const kind = at !== undefined ? "at" : every !== undefined ? "every" : "cron";
+  const spec = at ?? every ?? cron ?? "";
+  const prompt = flags.get("prompt") ?? "";
+  if (prompt.trim() === "") {
+    console.error("--prompt TEXT is required");
+    return 2;
+  }
+  const chat = flags.get("chat") ?? "";
+  const channelFlag = flags.get("channel");
+  let channel: string;
+  let chatId: string;
+  if (channelFlag !== undefined) {
+    channel = channelFlag;
+    chatId = chat;
+  } else {
+    const separator = chat.indexOf(":");
+    if (separator <= 0 || separator === chat.length - 1) {
+      console.error("--chat must be CHANNEL:CHATID (e.g. telegram:12345) or pass --channel");
+      return 2;
+    }
+    channel = chat.slice(0, separator);
+    chatId = chat.slice(separator + 1);
+  }
+  if (channel.trim() === "" || chatId.trim() === "") {
+    console.error("automation needs a non-empty channel and chat id");
+    return 2;
+  }
+  try {
+    const schedule = parseSchedule(kind, spec);
+    const now = Date.now();
+    const nextRun =
+      schedule.kind === "at"
+        ? (schedule.atMs ?? null)
+        : schedule.kind === "every"
+          ? now + (schedule.intervalMs ?? 0)
+          : nextRunMs(schedule, now);
+    if (nextRun === null) {
+      console.error(`cron "${schedule.spec}" never fires within 366 days — adjust the expression`);
+      return 2;
+    }
+    const id = randomUUID();
+    const name = flags.get("name") ?? `job-${id.slice(0, 8)}`;
+    const store = new CarapaceStore(loaded.config.storage.path);
+    try {
+      store.addAutomation({
+        id,
+        name,
+        kind,
+        spec: schedule.spec,
+        prompt,
+        channel,
+        chatId,
+        enabled: true,
+        lastRun: null,
+        nextRun,
+        state: "idle",
+        lastError: null,
+        createdAt: now,
+        updatedAt: now,
+      });
+    } finally {
+      store.close();
+    }
+    console.log(`added automation ${id} (${name})`);
+    console.log(`  schedule: ${kind} ${schedule.spec}`);
+    console.log(`  target:   ${channel}:${chatId}`);
+    console.log(`  nextRun:  ${new Date(nextRun).toISOString()}`);
+    return 0;
+  } catch (error) {
+    if (error instanceof ScheduleError) {
+      console.error(error.message);
+      return 2;
+    }
+    throw error;
+  }
+}
+
+function commandAutomationsRemove(argv: string[]): number {
+  const loaded = loadOrReport();
+  if (loaded === null) return 1;
+  const key = argv[0] ?? "";
+  if (key === "") {
+    console.error("usage: carapace automations remove <id|name>");
+    return 2;
+  }
+  const store = new CarapaceStore(loaded.config.storage.path);
+  try {
+    const resolved = resolveAutomation(store, key);
+    if (resolved.job === null) {
+      console.error(
+        resolved.ambiguous > 1
+          ? `ambiguous id prefix "${key}" — use the full id`
+          : `no automation "${key}" — see: carapace automations list`,
+      );
+      return 1;
+    }
+    store.deleteAutomation(resolved.job.id);
+    console.log(`removed automation ${resolved.job.id} (${resolved.job.name})`);
+    return 0;
+  } finally {
+    store.close();
+  }
+}
+
+async function commandAutomationsRun(argv: string[]): Promise<number> {
+  const loaded = loadOrReport();
+  if (loaded === null) return 1;
+  const key = argv[0] ?? "";
+  if (key === "") {
+    console.error("usage: carapace automations run <id|name>");
+    return 2;
+  }
+  const store = new CarapaceStore(loaded.config.storage.path);
+  const resolved = resolveAutomation(store, key);
+  if (resolved.job === null) {
+    store.close();
+    console.error(
+      resolved.ambiguous > 1
+        ? `ambiguous id prefix "${key}" — use the full id`
+        : `no automation "${key}" — see: carapace automations list`,
+    );
+    return 1;
+  }
+  if (!resolved.job.enabled) {
+    store.close();
+    console.error(`automation "${resolved.job.name}" is disabled`);
+    return 1;
+  }
+  const job = resolved.job;
+  const skills = new SkillRegistry(carapaceSkillsDir());
+  try {
+    const runtime = buildRuntime({ config: loaded.config, store, skills });
+    try {
+      const scheduler = runtime.scheduler;
+      if (scheduler === undefined) {
+        console.error("scheduler is disabled (automations.enabled=false) — enable it first");
+        return 1;
+      }
+      console.log(`running automation ${job.id} (${job.name}) now…`);
+      const result = await scheduler.runJob(job);
+      if (result.error !== undefined) console.error(`failed: ${result.error}`);
+      if (result.reply !== undefined && result.reply !== "") console.log(result.reply);
+      return result.error !== undefined ? 1 : 0;
+    } finally {
+      await runtime.scheduler?.stop(0);
+      runtime.close();
+    }
+  } finally {
+    skills.close();
+  }
+}
+
 function commandVersion(): number {
   console.log(`carapace ${VERSION} (node ${process.version})`);
   return 0;
@@ -509,6 +804,8 @@ export async function main(argv: string[]): Promise<number> {
       return commandModels();
     case "skills":
       return commandSkills(argv.slice(1));
+    case "automations":
+      return await commandAutomations(argv.slice(1));
     case "version":
     case "--version":
       return commandVersion();

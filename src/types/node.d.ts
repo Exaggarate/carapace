@@ -152,6 +152,8 @@ declare module "node:crypto" {
     digest(encoding: "hex"): string;
   }
   export function createHash(algorithm: string): Hash;
+  /** RFC 4122 v4 UUID. */
+  export function randomUUID(): string;
 }
 
 // --- timers ---

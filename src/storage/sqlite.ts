@@ -5,6 +5,7 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import type { StatementSync } from "node:sqlite";
+import type { ScheduleKind } from "../core/schedule.js";
 
 export type MessageRole = "user" | "assistant" | "tool" | "system";
 
@@ -37,6 +38,30 @@ export interface MessageRow {
   createdAt: number;
 }
 
+export interface AutomationRow {
+  id: string;
+  name: string;
+  /** "at" (one-shot ISO timestamp), "every" (interval), or "cron" (5-field expr). */
+  kind: ScheduleKind;
+  /** Spec string as supplied to `parseSchedule` (ISO for at, duration for every, expr for cron). */
+  spec: string;
+  prompt: string;
+  /** Target channel adapter name (e.g. "telegram"). */
+  channel: string;
+  /** Destination chat id on that channel. */
+  chatId: string;
+  enabled: boolean;
+  /** Epoch ms of the most recent fire (the claimed due time, not actual run time). */
+  lastRun: number | null;
+  /** Epoch ms of the next scheduled fire; null once a one-shot is done. */
+  nextRun: number | null;
+  /** idle | running | ok | done | error. */
+  state: string;
+  lastError: string | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
 const ROLES: readonly string[] = ["user", "assistant", "tool", "system"];
 
 const SCHEMA_SQL = `
@@ -63,6 +88,23 @@ CREATE TABLE IF NOT EXISTS channel_state (
   value      TEXT NOT NULL,
   updated_at INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS automations (
+  id         TEXT PRIMARY KEY,
+  name       TEXT NOT NULL,
+  kind       TEXT NOT NULL CHECK (kind IN ('at', 'every', 'cron')),
+  spec       TEXT NOT NULL,
+  prompt     TEXT NOT NULL,
+  channel    TEXT NOT NULL,
+  chat_id    TEXT NOT NULL,
+  enabled    INTEGER NOT NULL DEFAULT 1,
+  last_run   INTEGER,
+  next_run   INTEGER,
+  state      TEXT NOT NULL DEFAULT 'idle',
+  last_error TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_automations_next_run ON automations (enabled, next_run);
 `;
 
 // Columns added after the M0 schema; applied in-place so pre-M1 databases keep working.
@@ -89,6 +131,42 @@ interface RawMessageRow {
   tool_name: string | null;
   tool_calls: string | null;
   created_at: number;
+}
+
+interface RawAutomationRow {
+  id: string;
+  name: string;
+  kind: string;
+  spec: string;
+  prompt: string;
+  channel: string;
+  chat_id: string;
+  enabled: number;
+  last_run: number | null;
+  next_run: number | null;
+  state: string;
+  last_error: string | null;
+  created_at: number;
+  updated_at: number;
+}
+
+function toAutomationRow(row: RawAutomationRow): AutomationRow {
+  return {
+    id: row.id,
+    name: row.name,
+    kind: row.kind as ScheduleKind,
+    spec: row.spec,
+    prompt: row.prompt,
+    channel: row.channel,
+    chatId: row.chat_id,
+    enabled: row.enabled !== 0,
+    lastRun: row.last_run,
+    nextRun: row.next_run,
+    state: row.state,
+    lastError: row.last_error,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
 
 /** Parse persisted assistant tool calls; malformed rows degrade to null, never throw. */
@@ -152,6 +230,20 @@ export class CarapaceStore {
   private readonly selectRecentMessages: StatementSync;
   private readonly getChannelStateStmt: StatementSync;
   private readonly setChannelStateStmt: StatementSync;
+  private readonly insertAutomation: StatementSync;
+  private readonly selectAutomation: StatementSync;
+  private readonly selectAutomationByName: StatementSync;
+  private readonly selectAutomationByIdPrefix: StatementSync;
+  private readonly selectAutomations: StatementSync;
+  private readonly deleteAutomationStmt: StatementSync;
+  private readonly setAutomationEnabledStmt: StatementSync;
+  private readonly claimAutomationStmt: StatementSync;
+  private readonly advanceAutomationStmt: StatementSync;
+  private readonly setAutomationOutcomeStmt: StatementSync;
+  private readonly selectDueAutomationsStmt: StatementSync;
+  private readonly selectNextDueAutomationStmt: StatementSync;
+  private readonly countAutomationsStmt: StatementSync;
+  private readonly countEnabledAutomationsStmt: StatementSync;
 
   constructor(dbPath: string) {
     if (dbPath !== ":memory:") mkdirSync(dirname(dbPath), { recursive: true });
@@ -203,6 +295,52 @@ export class CarapaceStore {
       "INSERT INTO channel_state (key, value, updated_at) VALUES (?, ?, ?) " +
         "ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
     );
+    this.insertAutomation = this.db.prepare(
+      "INSERT OR REPLACE INTO automations " +
+        "(id, name, kind, spec, prompt, channel, chat_id, enabled, last_run, next_run, state, last_error, created_at, updated_at) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    );
+    this.selectAutomation = this.db.prepare(
+      "SELECT id, name, kind, spec, prompt, channel, chat_id, enabled, last_run, next_run, state, last_error, created_at, updated_at " +
+        "FROM automations WHERE id = ?",
+    );
+    this.selectAutomationByName = this.db.prepare(
+      "SELECT id, name, kind, spec, prompt, channel, chat_id, enabled, last_run, next_run, state, last_error, created_at, updated_at " +
+        "FROM automations WHERE name = ? ORDER BY created_at LIMIT 1",
+    );
+    this.selectAutomationByIdPrefix = this.db.prepare(
+      "SELECT id, name, kind, spec, prompt, channel, chat_id, enabled, last_run, next_run, state, last_error, created_at, updated_at " +
+        "FROM automations WHERE id LIKE ? ORDER BY id LIMIT 2",
+    );
+    this.selectAutomations = this.db.prepare(
+      "SELECT id, name, kind, spec, prompt, channel, chat_id, enabled, last_run, next_run, state, last_error, created_at, updated_at " +
+        "FROM automations " +
+        "ORDER BY (next_run IS NULL), next_run ASC, created_at ASC",
+    );
+    this.deleteAutomationStmt = this.db.prepare("DELETE FROM automations WHERE id = ?");
+    this.setAutomationEnabledStmt = this.db.prepare(
+      "UPDATE automations SET enabled = ?, updated_at = ? WHERE id = ?",
+    );
+    this.claimAutomationStmt = this.db.prepare(
+      "UPDATE automations SET last_run = ?, next_run = ?, state = 'running', last_error = NULL, updated_at = ? " +
+        "WHERE id = ? AND enabled = 1 AND (last_run IS NULL OR last_run < ?)",
+    );
+    this.advanceAutomationStmt = this.db.prepare(
+      "UPDATE automations SET next_run = ?, updated_at = ? WHERE id = ? AND enabled = 1 AND next_run IS NOT NULL AND next_run <= ?",
+    );
+    this.setAutomationOutcomeStmt = this.db.prepare(
+      "UPDATE automations SET state = ?, last_error = ?, updated_at = ? WHERE id = ?",
+    );
+    this.selectDueAutomationsStmt = this.db.prepare(
+      "SELECT id, name, kind, spec, prompt, channel, chat_id, enabled, last_run, next_run, state, last_error, created_at, updated_at " +
+        "FROM automations WHERE enabled = 1 AND next_run IS NOT NULL AND next_run <= ? ORDER BY next_run ASC",
+    );
+    this.selectNextDueAutomationStmt = this.db.prepare(
+      "SELECT id, name, kind, spec, prompt, channel, chat_id, enabled, last_run, next_run, state, last_error, created_at, updated_at " +
+        "FROM automations WHERE enabled = 1 AND next_run IS NOT NULL ORDER BY next_run ASC LIMIT 1",
+    );
+    this.countAutomationsStmt = this.db.prepare("SELECT COUNT(*) AS n FROM automations");
+    this.countEnabledAutomationsStmt = this.db.prepare("SELECT COUNT(*) AS n FROM automations WHERE enabled = 1");
   }
 
   createSession(id: string, channel: string, metadata: Record<string, unknown> = {}): void {
@@ -306,6 +444,95 @@ export class CarapaceStore {
   /** Persist a channel bookkeeping value (upsert). */
   setChannelState(key: string, value: string): void {
     this.setChannelStateStmt.run(key, value, Date.now());
+  }
+
+  // ── Automations (M8): persisted scheduled jobs ────────────────────────────
+
+  /** Insert or replace a full automation row (id is the key). */
+  addAutomation(job: AutomationRow): void {
+    this.insertAutomation.run(
+      job.id,
+      job.name,
+      job.kind,
+      job.spec,
+      job.prompt,
+      job.channel,
+      job.chatId,
+      job.enabled ? 1 : 0,
+      job.lastRun,
+      job.nextRun,
+      job.state,
+      job.lastError,
+      job.createdAt,
+      job.updatedAt,
+    );
+  }
+
+  getAutomation(id: string): AutomationRow | null {
+    const row = this.selectAutomation.get(id) as RawAutomationRow | undefined;
+    return row === undefined ? null : toAutomationRow(row);
+  }
+
+  /** First automation created under this name (names are not unique). */
+  findAutomationByName(name: string): AutomationRow | null {
+    const row = this.selectAutomationByName.get(name) as RawAutomationRow | undefined;
+    return row === undefined ? null : toAutomationRow(row);
+  }
+
+  /** Resolve a short id prefix; match === null with candidates > 1 means ambiguous. */
+  findAutomationByIdPrefix(prefix: string): { match: AutomationRow | null; candidates: number } {
+    const rows = this.selectAutomationByIdPrefix.all(`${prefix}%`) as RawAutomationRow[];
+    return { match: rows.length === 1 ? toAutomationRow(rows[0] as RawAutomationRow) : null, candidates: rows.length };
+  }
+
+  /** All automations: due jobs first (soonest next_run), then one-shot done rows. */
+  listAutomations(): AutomationRow[] {
+    return (this.selectAutomations.all() as RawAutomationRow[]).map(toAutomationRow);
+  }
+
+  deleteAutomation(id: string): boolean {
+    return Number(this.deleteAutomationStmt.run(id).changes) > 0;
+  }
+
+  setAutomationEnabled(id: string, enabled: boolean): void {
+    this.setAutomationEnabledStmt.run(enabled ? 1 : 0, Date.now(), id);
+  }
+
+  /**
+   * Durable fire guard: atomically record that the job fired for `dueRun` and set
+   * its next run. Only succeeds when enabled and last_run < dueRun, so a job can
+   * never fire twice for the same scheduled time across ticks or restarts.
+   */
+  claimAutomation(id: string, dueRun: number, nextRun: number | null): boolean {
+    const result = this.claimAutomationStmt.run(dueRun, nextRun, Date.now(), id, dueRun);
+    return Number(result.changes) === 1;
+  }
+
+  /** Boot catch-up for recurring jobs: skip missed intervals without firing. */
+  advanceAutomation(id: string, nextRun: number): boolean {
+    return Number(this.advanceAutomationStmt.run(nextRun, Date.now(), id, Date.now()).changes) > 0;
+  }
+
+  /** Post-run outcome: ok/done on success, error + message on failure. */
+  setAutomationOutcome(id: string, state: string, lastError: string | null): void {
+    this.setAutomationOutcomeStmt.run(state, lastError, Date.now(), id);
+  }
+
+  /** Enabled jobs whose next_run has arrived (soonest first). */
+  dueAutomations(now: number): AutomationRow[] {
+    return (this.selectDueAutomationsStmt.all(now) as RawAutomationRow[]).map(toAutomationRow);
+  }
+
+  automationCounts(): { total: number; enabled: number } {
+    const total = countCountRow(this.countAutomationsStmt.get());
+    const enabled = countCountRow(this.countEnabledAutomationsStmt.get());
+    return { total, enabled };
+  }
+
+  /** Enabled job with the earliest next_run (null when nothing is scheduled). */
+  nextDueAutomation(): AutomationRow | null {
+    const row = this.selectNextDueAutomationStmt.get() as RawAutomationRow | undefined;
+    return row === undefined ? null : toAutomationRow(row);
   }
 
   close(): void {
