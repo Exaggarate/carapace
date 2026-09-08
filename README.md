@@ -4,7 +4,7 @@ An independent, multi-channel AI agent gateway. Carapace runs your own assistant
 own hardware and talks to your own chats — Telegram first, raw HTTP alongside, more
 later. Every line here is written for this project: not a fork, not a rebrand.
 
-## Status: M3 (community wishlist as native features)
+## Status: M4 (Telegram Business + durable deployment)
 
 Working today:
 
@@ -20,6 +20,12 @@ Working today:
   `/reset`, a sender allowlist, and media handling: photos, documents and voice notes are
   downloaded into `channels.telegram.mediaDir` and passed to the agent as context paths,
   captions included.
+- **Telegram Business (#20786)** — when the owner connects the bot via Telegram Business
+  settings, `business_message`/`business_connection` updates are handled natively:
+  conversations get their own sessions plus a `[business]` context line naming the
+  account, replies go out via `sendMessage` with `business_connection_id` (on behalf of
+  the business account), and connection state persists across restarts. Toggle:
+  `channels.telegram.business` (default true).
 - **HTTP channel** — `POST /api/v1/messages` runs the same agent loop; `GET /api/v1/sessions`
   lists sessions; both require bearer auth when `gateway.apiToken` resolves (constant-time
   compare, 401 on missing/wrong token).
@@ -33,6 +39,10 @@ Working today:
 - **Gateway + doctor** — `carapace gateway` boots the runtime on `gateway.host:gateway.port`;
   `carapace doctor` verifies node, config, directories, storage engine, channels, llm,
   file-defined tools, and routing tables.
+- **pm2-ready durability** — `ecosystem.config.cjs` + `scripts/start-gateway.sh` run the
+  gateway under pm2 with autorestart, exponential restart backoff, a memory ceiling, and a
+  kill timeout matching the 15s shutdown grace; credentials load from
+  `~/.carapace/gateway.env`, so pm2's process dump stays secret-free.
 - **Turn budget + stall watchdog (#68596)** — `llm.turnTimeoutMs` bounds one whole agent
   turn and `llm.watchdogTimeoutSec` aborts a provider call that never completes; stalled
   turns abort cleanly with a user-visible error instead of hanging forever.
@@ -45,8 +55,9 @@ Working today:
   exec-backed tools; an optional `setup` argv runs once on first load, inside the allowed
   roots, with its output logged.
 
-Next (M4): theme system (#28300), Telegram Business Bot support (#20786), plugin-
-contributed UI (#66944), more channels.
+Next (M5): theme system (#28300) and plugin-contributed UI (#66944) — both need a
+web-layer design decision first — plus more channels (Discord, WhatsApp) and a
+third-party plugin interface.
 
 ## Quickstart
 
@@ -56,6 +67,9 @@ npm run build
 node dist/cli/index.js doctor
 node dist/cli/index.js gateway
 ```
+
+**Deploy:** `pm2 start ecosystem.config.cjs` — credentials in `~/.carapace/gateway.env`;
+see docs/index.md, section "Deployment with pm2".
 
 ## Config
 
@@ -78,6 +92,7 @@ node dist/cli/index.js gateway
 | channels.telegram.botToken | `{"env": "CARAPACE_TELEGRAM_TOKEN"}` | CARAPACE_TELEGRAM_TOKEN |
 | channels.telegram.allowedSenders | [] (everyone) | — |
 | channels.telegram.mediaDir | ~/.carapace/workspace/media | CARAPACE_MEDIA_DIR |
+| channels.telegram.business | true | — |
 | channels.api.enabled | true | CARAPACE_API_ENABLED |
 | agent.systemPrompt | Carapace default | — |
 | agent.maxToolIterations | 12 (1–64) | — |
@@ -96,7 +111,7 @@ happens at runtime; the value never lands in config files or logs.
 
 ## Community wishlist → Carapace
 
-Carapace's roadmap is driven by what users actually ask for upstream. M3 turns the
+Carapace's roadmap is driven by what users actually ask for upstream. M3 and M4 turn the
 top-liked community requests from the upstream project into native features, designed in rather than patched on:
 
 | Upstream issue | 👍 | Carapace feature |
@@ -104,10 +119,11 @@ top-liked community requests from the upstream project into native features, des
 | #68596 configurable streaming watchdog | 8 | `llm.turnTimeoutMs` + `llm.watchdogTimeoutSec` — stalled turns abort cleanly with a user-visible error |
 | #27445 announceTarget for completion routing | 5 | `agent.announceTarget` — full replies route to a chosen `channel:chatId`; the origin chat gets a short notice |
 | #80213 tool/skill setup hooks | 4 | `~/.carapace/tools/*.json` declare exec-backed tools with a once-only `setup` argv (marker-tracked, logged) |
+| #20786 Telegram Business Bot support | 7 | `business_message`/`business_connection` handled natively — persisted connections, separate business sessions, replies on behalf of the business account |
 | #81271 per-sender exec node routing | 3 | `senders[]` routing table — per-sender tool allowlists + model overrides (single-node adaptation) |
 
-Deferred to M4 (larger surfaces): theme customization (#28300), Telegram Business Bot
-support (#20786), plugin-contributed UI pages (#66944).
+Deferred to M5 (larger surfaces): theme customization (#28300) and plugin-contributed UI
+pages (#66944) — both need a web-layer design decision first.
 
 ## API endpoints
 
@@ -132,8 +148,9 @@ unauthorized · 413 payload too large · 429 busy queue full · 500 agent turn f
 
 ## Docs
 
-See [docs/index.md](docs/index.md) for architecture, the full config reference, media
-handling, restart semantics, doctor checks, and the roadmap.
+See [docs/index.md](docs/index.md) for architecture, the full config reference, Telegram
+Business, pm2 deployment, media handling, restart semantics, doctor checks, and the
+roadmap.
 
 ## License
 

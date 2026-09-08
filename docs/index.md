@@ -12,7 +12,7 @@ opposite: the operator (you) owns the machine, the config, the secrets, and the 
 accounts. The gateway's job is to connect those chats to an agent loop with tools —
 reliably, transparently, and without phoning home.
 
-## Architecture at M3
+## Architecture at M4
 
 ```
 src/
@@ -31,7 +31,7 @@ src/
 │   ├── runtime.ts        wiring, per-chat busy gate, waitUntilIdle, offset adapter
 │   └── channels/
 │       ├── types.ts      ChannelAdapter contract, BusyTurnError, SessionDirectory
-│       ├── telegram.ts   long-poll adapter: commands, media, offsets, drain
+│       ├── telegram.ts   long-poll adapter: commands, media, business (#20786), offsets, drain
 │       └── api.ts        HTTP channel: POST /api/v1/messages, GET /api/v1/sessions
 ├── storage/sqlite.ts     node:sqlite store (sessions, messages, channel_state; WAL)
 └── types/node.d.ts       hand-rolled ambient types (keeps devDeps to typescript only)
@@ -71,6 +71,32 @@ path with kind, mime type, size, and (for voice) duration; a caption rides along
 blank line. Downloads respect the 20 MB Bot API cap; a failed or oversized attachment
 degrades into a `[media] <kind> unavailable (…)` note inside the same turn, so one bad
 attachment never kills the reply. Unsupported types (e.g. stickers) get a short notice.
+
+### Telegram Business support (#20786)
+
+When the owner connects the bot to their account via Telegram Business settings, the Bot
+API starts delivering `business_connection` and `business_message` updates. Carapace
+handles both natively (toggle: `channels.telegram.business`, default `true`):
+
+- `business_connection` updates are remembered — connection id, the business user's
+  @username/name, `can_reply`, `is_enabled` — and persisted in `channel_state`
+  (`telegram:business_connections`), so business chats keep working after a restart
+  without waiting for a fresh connection update.
+- `business_message` updates route through the same agent loop as normal messages. The
+  agent receives a `[business] Replying on behalf of @<username>` context line, and the
+  conversation gets its own session (`telegram:business:<chatId>`), separate from any
+  direct chat with the same customer.
+- Replies go out via `sendMessage` carrying `business_connection_id`, so they are sent on
+  behalf of the business account; the typing indicator is scoped the same way.
+- Authorization: business customers are trusted via the active connection (`is_enabled`
+  and `can_reply` both required); `channels.telegram.allowedSenders` applies to direct
+  bot chats only. Messages for unknown, disabled, or non-replying connections are dropped
+  and logged. With the toggle off, business messages are ignored while direct chats keep
+  working (connections are still recorded, so re-enabling later just works).
+- Media in business messages (photo/document/voice) is handled like direct-chat media.
+
+`allowed_updates` includes the business update types automatically; no Bot API-side setup
+is needed beyond connecting the bot in Telegram Business settings.
 
 ### Graceful restarts
 
@@ -195,7 +221,8 @@ it to localhost in that case; doctor names the mode.
 | /reset | delete this chat's session (history cascade) — next message starts fresh |
 
 Unknown slash commands fall through to the agent like any other text. Only senders listed
-in `channels.telegram.allowedSenders` are processed (empty list = everyone).
+in `channels.telegram.allowedSenders` are processed (empty list = everyone); business-
+message customers are instead authorized by their active business connection.
 
 ## Configuration
 
@@ -218,6 +245,7 @@ in `channels.telegram.allowedSenders` are processed (empty list = everyone).
 | channels.telegram.botToken | `{"env": "CARAPACE_TELEGRAM_TOKEN"}` | CARAPACE_TELEGRAM_TOKEN |
 | channels.telegram.allowedSenders | [] | — |
 | channels.telegram.mediaDir | ~/.carapace/workspace/media | CARAPACE_MEDIA_DIR |
+| channels.telegram.business | true | — |
 | channels.api.enabled | true | CARAPACE_API_ENABLED |
 | agent.systemPrompt | Carapace default | — |
 | agent.maxToolIterations | 12 (1–64) | — |
@@ -294,8 +322,8 @@ API channel enabled is healthy. Note: `node:sqlite` prints an upstream
 - `messages(id, session_id, role, content, tool_call_id, tool_name, tool_calls, created_at)`
   — full turn history, roles user / assistant / tool / system, foreign-keyed with cascade
   delete (assistant tool calls persist as JSON and round-trip losslessly)
-- `channel_state(key, value, updated_at)` — channel bookkeeping, currently the Telegram
-  update-offset frontier
+- `channel_state(key, value, updated_at)` — channel bookkeeping: the Telegram
+  update-offset frontier and the persisted Telegram business-connection map
 
 All tables are created idempotently on open; post-M0 columns are migrated in place, so
 pre-M1 databases keep working.
@@ -308,9 +336,13 @@ pre-M1 databases keep working.
 - **M3 (done):** community wishlist as native features — configurable turn budget/stall
   watchdog (#68596), announceTarget completion routing (#27445), per-sender routing
   table (#81271), file-defined tools with once-only setup hooks (#80213).
-- **M4:** theme customization system (#28300), Telegram Business Bot support (#20786),
-  plugin-contributed UI pages (#66944), more channels (Discord, WhatsApp, …) and a
-  third-party plugin interface.
+- **M4 (done):** Telegram Business support (#20786 — `business_connection`/`business_message`
+  handling with persisted connections, separate business sessions, and replies sent on
+  behalf of the business account) and gateway durability via pm2 (`ecosystem.config.cjs`
+  + `scripts/start-gateway.sh` sourcing `~/.carapace/gateway.env`).
+- **M5:** theme customization system (#28300) and plugin-contributed UI pages (#66944) —
+  both need a web-layer design decision first — plus more channels (Discord, WhatsApp, …)
+  and a third-party plugin interface.
 
 ## Conventions
 
