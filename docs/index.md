@@ -12,7 +12,7 @@ opposite: the operator (you) owns the machine, the config, the secrets, and the 
 accounts. The gateway's job is to connect those chats to an agent loop with tools —
 reliably, transparently, and without phoning home.
 
-## Architecture at M5
+## Architecture at M6
 
 ```
 src/
@@ -34,6 +34,7 @@ src/
 │   └── channels/
 │       ├── types.ts      ChannelAdapter contract, BusyTurnError, SessionDirectory
 │       ├── telegram.ts   long-poll adapter: commands, media, business (#20786), offsets, drain
+│       ├── discord.ts    gateway WS adapter: identify, heartbeat, resume, REST sender (M6)
 │       └── api.ts        HTTP channel: POST /api/v1/messages, GET /api/v1/sessions
 ├── storage/sqlite.ts     node:sqlite store (sessions, messages, channel_state; WAL)
 └── types/node.d.ts       hand-rolled ambient types (keeps devDeps to typescript only)
@@ -101,6 +102,37 @@ handles both natively (toggle: `channels.telegram.business`, default `true`):
 
 `allowed_updates` includes the business update types automatically; no Bot API-side setup
 is needed beyond connecting the bot in Telegram Business settings.
+
+### Discord adapter (M6)
+
+`src/gateway/channels/discord.ts` connects to `wss://gateway.discord.dev/?v=10&encoding=json`
+with Node 22's built-in WebSocket — zero runtime dependencies, no Discord library:
+
+- **Identify** — after HELLO the adapter sends IDENTIFY with `channels.discord.botToken`
+  (SecretRef, resolved at runtime) and intents GUILD_MESSAGES | DIRECT_MESSAGES |
+  MESSAGE_CONTENT. The portal's MESSAGE CONTENT INTENT toggle must be enabled — without
+  it Discord delivers guild message content empty (DMs still carry content; the README's
+  Discord setup section explains why the toggle is privileged).
+- **Heartbeat** — every `heartbeat_interval` from HELLO the adapter sends `{op: 1, d: seq}`;
+  a missed HEARTBEAT_ACK tears the zombie link down and resumes.
+- **Resume** — READY's `session_id` and every dispatch's `seq` are remembered; after any
+  close (server RECONNECT op 7, dropped socket, backoff capped at 30 s) the adapter sends
+  RESUME with `token + session_id + seq`. INVALID_SESSION `d=true` resumes, `d=false`
+  forgets the session and identifies fresh after the mandated 1–5 s pause. Close code
+  4004 is fatal — the token is invalid, retrying can never succeed.
+- **Dispatch → agent** — MESSAGE_CREATE (bot authors and webhook chatter ignored,
+  whitespace-only skipped) becomes a `discord:<chatId>` session message through the same
+  per-chat busy gate as every channel; replies post via REST
+  `POST /channels/{id}/messages`, split at the 2000-character content cap.
+- **Rate limits** — REST sends run through a serialized queue; `x-ratelimit-remaining: 0`
+  (with `x-ratelimit-reset-after`) sets a cooldown before the next send, and a 429 body's
+  `retry_after` triggers exactly one delayed retry.
+- **Doctor** — `channel:discord` reports enabled/token resolution; with a resolvable
+  token, `channel:discord-gateway` probes REST `GET /users/@me` (401 FAILs, unreachable
+  WARNs). A disabled channel never touches the network.
+
+Disabled by default (`channels.discord.enabled: false`) — the adapter only connects once
+a token resolves.
 
 ### Graceful restarts
 
@@ -319,6 +351,8 @@ message customers are instead authorized by their active business connection.
 | channels.telegram.mediaDir | ~/.carapace/workspace/media | CARAPACE_MEDIA_DIR |
 | channels.telegram.business | true | — |
 | channels.api.enabled | true | CARAPACE_API_ENABLED |
+| channels.discord.enabled | false | CARAPACE_DISCORD_ENABLED |
+| channels.discord.botToken | `{"env": "CARAPACE_DISCORD_TOKEN"}` | CARAPACE_DISCORD_TOKEN |
 | agent.systemPrompt | Carapace default | — |
 | agent.maxToolIterations | 12 (1–64) | — |
 | agent.announceTarget | null (reply to origin) | CARAPACE_ANNOUNCE_TARGET (`channel:chatId`) |
@@ -346,7 +380,8 @@ secret lives:
 
 Resolution happens at runtime via `resolveSecret()`; the resolved value never lands in
 config files or logs — status output only ever names the source. This applies to
-`llm.apiKey`, `gateway.apiToken`, and `channels.telegram.botToken` alike.
+`llm.apiKey`, `gateway.apiToken`, `channels.telegram.botToken`, and
+`channels.discord.botToken` alike.
 
 ## Deployment with pm2
 
@@ -380,7 +415,8 @@ self-healing deployments:
 3. config home directory writable
 4. storage directory writable
 5. storage engine probe: sessions + messages round-trip on a throwaway db in tmp
-6. channel status (telegram enabled/token resolution/media dir, api enabled/auth mode)
+6. channel status (telegram enabled/token resolution/media dir, api enabled/auth mode,
+   discord enabled/token resolution + gateway reachability probe)
 7. llm reachability of secrets (`apiKey` unresolved is a warning, not a failure)
 8. tools: allowedRoots writability, exec timeout, denylist size
 9. tools:custom — file-defined tool definitions validated read-only (setups never run)
@@ -389,6 +425,9 @@ self-healing deployments:
 11. ui:theme — dashboard theme preset valid; with `ui.theme: "custom"` the theme file must
     be readable and CSS-shaped (non-empty, no markup, balanced braces) — invalid files FAIL
 12. ui:plugins — plugin-UI scan: loaded plugins are listed; manifest problems WARN
+13. channel:discord — enabled/token resolution (disabled channels are reported, not
+    failed); with a resolvable token, `channel:discord-gateway` probes REST
+    `GET /users/@me` — a rejected token (401) FAILs, an unreachable gateway WARNs
 
 Disabled-by-config channels are reported, not failed — a default install with only the
 API channel enabled is healthy. Note: `node:sqlite` prints an upstream
@@ -422,8 +461,12 @@ pre-M1 databases keep working.
   messages, chat, and redacted-config views; presets + custom theme file, doctor-validated)
   and the plugin-UI foundation (#66944 — `plugins/` convention, manifest endpoint, bundled
   `system-info` panel).
-- **M6:** more channels (Discord, WhatsApp, …), a third-party plugin interface (tool
-  injection + lifecycle hooks), and richer dashboard write actions.
+- **M6 (done):** Discord channel adapter — gateway WebSocket (identify, heartbeat,
+  resume, reconnect flows; zero runtime dependencies) + REST message sender with minimal
+  rate-limit handling, `channels.discord { enabled, botToken }` config, doctor probes.
+  Next: WhatsApp (needs a Meta Business API vs unofficial-bridge design decision), a
+  third-party plugin interface (tool injection + lifecycle hooks), richer dashboard write
+  actions.
 
 ## Conventions
 

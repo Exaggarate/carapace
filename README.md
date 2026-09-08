@@ -1,10 +1,10 @@
 # Carapace
 
 An independent, multi-channel AI agent gateway. Carapace runs your own assistant on your
-own hardware and talks to your own chats — Telegram first, raw HTTP alongside, more
-later. Every line here is written for this project: not a fork, not a rebrand.
+own hardware and talks to your own chats — Telegram, Discord, raw HTTP — more later.
+Every line here is written for this project: not a fork, not a rebrand.
 
-## Status: M5 (web dashboard + themes + plugin UI)
+## Status: M6 (Discord channel adapter)
 
 Working today:
 
@@ -26,6 +26,13 @@ Working today:
   account, replies go out via `sendMessage` with `business_connection_id` (on behalf of
   the business account), and connection state persists across restarts. Toggle:
   `channels.telegram.business` (default true).
+- **Discord channel (M6)** — gateway adapter on Node 22's built-in WebSocket (zero extra
+  dependencies): identify with the bot token, heartbeat on the server-provided interval,
+  resume with `session_id`+`seq` across reconnects, op-7/INVALID_SESSION handling, and a
+  4004 close treated as fatal (bad token). MESSAGE_CREATE (bot authors and webhook chatter
+  ignored) runs the same agent loop; replies post via REST `POST /channels/{id}/messages`
+  through a serialized queue with `x-ratelimit-remaining`/`retry_after` handling and
+  2000-char chunking. `carapace doctor` probes the token against `GET /users/@me`.
 - **HTTP channel** — `POST /api/v1/messages` runs the same agent loop; `GET /api/v1/sessions`
   lists sessions; both require bearer auth when `gateway.apiToken` resolves (constant-time
   compare, 401 on missing/wrong token).
@@ -70,8 +77,9 @@ Working today:
   exec-backed tools; an optional `setup` argv runs once on first load, inside the allowed
   roots, with its output logged.
 
-Next (M6): more channels (Discord, WhatsApp), a third-party plugin interface (tool
-injection + lifecycle), and richer dashboard write actions.
+Next (M7): WhatsApp (needs a Meta Business API vs unofficial-bridge design decision), a
+third-party plugin interface (tool injection + lifecycle hooks), and richer dashboard
+write actions.
 
 ## Quickstart
 
@@ -108,6 +116,8 @@ see docs/index.md, section "Deployment with pm2".
 | channels.telegram.mediaDir | ~/.carapace/workspace/media | CARAPACE_MEDIA_DIR |
 | channels.telegram.business | true | — |
 | channels.api.enabled | true | CARAPACE_API_ENABLED |
+| channels.discord.enabled | false | CARAPACE_DISCORD_ENABLED |
+| channels.discord.botToken | `{"env": "CARAPACE_DISCORD_TOKEN"}` | CARAPACE_DISCORD_TOKEN |
 | agent.systemPrompt | Carapace default | — |
 | agent.maxToolIterations | 12 (1–64) | — |
 | agent.announceTarget | null (reply to origin) | CARAPACE_ANNOUNCE_TARGET (`channel:chatId`) |
@@ -125,6 +135,35 @@ see docs/index.md, section "Deployment with pm2".
 **Secrets:** don't paste tokens inline. Point at them instead — `{"env": "VARNAME"}` reads
 an environment variable, `{"file": "/path"}` reads a file (tilde allowed). Resolution
 happens at runtime; the value never lands in config files or logs.
+
+## Discord channel setup
+
+The Discord adapter connects to `wss://gateway.discord.dev` with Node 22's built-in
+WebSocket — no Discord library, no extra dependencies — and posts replies through the
+Discord REST API.
+
+1. Create an application at <https://discord.com/developers/applications> (**New Application**).
+2. Open **Bot** → **Reset Token** and copy the bot token — this becomes
+   `channels.discord.botToken` (store it as a SecretRef, e.g. an env var, not inline).
+3. Under **Bot → Privileged Gateway Intents**, enable **MESSAGE CONTENT INTENT**. Carapace
+   requests the `MESSAGE_CONTENT` intent in its identify payload; without the portal
+   toggle Discord delivers guild messages with empty content (DMs still carry content),
+   so the agent would see blank text. The toggle is privileged because it exposes message
+   content to bots at scale — that is exactly why it must be enabled deliberately.
+4. Invite the bot (OAuth2 → URL Generator, scope `bot`, permissions `Send Messages` +
+   `Read Message History`), or DM it directly — DMs need no guild.
+5. Enable it in config:
+
+```json
+"channels": {
+  "discord": { "enabled": true, "botToken": { "env": "CARAPACE_DISCORD_TOKEN" } }
+}
+```
+
+When the channel is enabled, `carapace doctor` probes REST `GET /users/@me` with the
+token (401 = bad token → FAIL; unreachable gateway → WARN). The bot ignores its own and
+other bots' messages plus webhook chatter; long replies are chunked at Discord's
+2000-character cap.
 
 ## Community wishlist → Carapace
 
