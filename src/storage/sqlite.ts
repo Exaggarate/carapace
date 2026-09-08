@@ -8,6 +8,13 @@ import type { StatementSync } from "node:sqlite";
 
 export type MessageRole = "user" | "assistant" | "tool" | "system";
 
+/** One assistant tool request, persisted as JSON in messages.tool_calls. */
+export interface StoredToolCall {
+  id: string;
+  name: string;
+  arguments: Record<string, unknown>;
+}
+
 export interface SessionRow {
   id: string;
   channel: string;
@@ -21,6 +28,12 @@ export interface MessageRow {
   sessionId: string;
   role: MessageRole;
   content: string;
+  /** role="tool": id of the assistant tool call this row answers. */
+  toolCallId: string | null;
+  /** role="tool": name of the tool that produced this row. */
+  toolName: string | null;
+  /** role="assistant": tool calls requested alongside this message. */
+  toolCalls: StoredToolCall[] | null;
   createdAt: number;
 }
 
@@ -35,14 +48,24 @@ CREATE TABLE IF NOT EXISTS sessions (
   metadata   TEXT NOT NULL DEFAULT '{}'
 );
 CREATE TABLE IF NOT EXISTS messages (
-  id         INTEGER PRIMARY KEY AUTOINCREMENT,
-  session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-  role       TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'tool', 'system')),
-  content    TEXT NOT NULL,
-  created_at INTEGER NOT NULL
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id   TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+  role         TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'tool', 'system')),
+  content      TEXT NOT NULL,
+  tool_call_id TEXT,
+  tool_name    TEXT,
+  tool_calls   TEXT,
+  created_at   INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_messages_session_time ON messages (session_id, created_at);
 `;
+
+// Columns added after the M0 schema; applied in-place so pre-M1 databases keep working.
+const MIGRATION_SQL = [
+  "ALTER TABLE messages ADD COLUMN tool_call_id TEXT",
+  "ALTER TABLE messages ADD COLUMN tool_name TEXT",
+  "ALTER TABLE messages ADD COLUMN tool_calls TEXT",
+];
 
 interface RawSessionRow {
   id: string;
@@ -57,7 +80,36 @@ interface RawMessageRow {
   session_id: string;
   role: string;
   content: string;
+  tool_call_id: string | null;
+  tool_name: string | null;
+  tool_calls: string | null;
   created_at: number;
+}
+
+/** Parse persisted assistant tool calls; malformed rows degrade to null, never throw. */
+function parseToolCalls(raw: string | null): StoredToolCall[] | null {
+  if (raw === null || raw === "") return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(parsed)) return null;
+  const calls: StoredToolCall[] = [];
+  for (const item of parsed) {
+    if (typeof item !== "object" || item === null) continue;
+    const record = item as Record<string, unknown>;
+    const id = typeof record.id === "string" ? record.id : "";
+    const name = typeof record.name === "string" ? record.name : "";
+    if (id === "" || name === "") continue;
+    const args =
+      typeof record.arguments === "object" && record.arguments !== null && !Array.isArray(record.arguments)
+        ? (record.arguments as Record<string, unknown>)
+        : {};
+    calls.push({ id, name, arguments: args });
+  }
+  return calls.length > 0 ? calls : null;
 }
 
 function toMessageRow(row: RawMessageRow): MessageRow {
@@ -66,6 +118,9 @@ function toMessageRow(row: RawMessageRow): MessageRow {
     sessionId: row.session_id,
     role: (ROLES as readonly string[]).includes(row.role) ? (row.role as MessageRole) : "system",
     content: row.content,
+    toolCallId: row.tool_call_id,
+    toolName: row.tool_name,
+    toolCalls: parseToolCalls(row.tool_calls),
     createdAt: row.created_at,
   };
 }
@@ -78,12 +133,21 @@ export class CarapaceStore {
   private readonly insertMessage: StatementSync;
   private readonly selectLastMessage: StatementSync;
   private readonly selectMessages: StatementSync;
+  private readonly selectSessions: StatementSync;
 
   constructor(dbPath: string) {
     if (dbPath !== ":memory:") mkdirSync(dirname(dbPath), { recursive: true });
     this.db = new DatabaseSync(dbPath);
     this.db.exec("PRAGMA foreign_keys = ON;");
     this.db.exec(SCHEMA_SQL);
+    for (const statement of MIGRATION_SQL) {
+      try {
+        this.db.exec(statement);
+      } catch (error) {
+        // Expected on M0-era databases: the column already exists.
+        if (!String((error as Error).message).includes("duplicate column")) throw error;
+      }
+    }
     this.insertSession = this.db.prepare(
       "INSERT INTO sessions (id, channel, created_at, updated_at, metadata) VALUES (?, ?, ?, ?, ?)",
     );
@@ -92,13 +156,19 @@ export class CarapaceStore {
     );
     this.touchSessionStmt = this.db.prepare("UPDATE sessions SET updated_at = ? WHERE id = ?");
     this.insertMessage = this.db.prepare(
-      "INSERT INTO messages (session_id, role, content, created_at) VALUES (?, ?, ?, ?)",
+      "INSERT INTO messages (session_id, role, content, tool_call_id, tool_name, tool_calls, created_at) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
     );
     this.selectLastMessage = this.db.prepare(
-      "SELECT id, session_id, role, content, created_at FROM messages WHERE session_id = ? ORDER BY id DESC LIMIT 1",
+      "SELECT id, session_id, role, content, tool_call_id, tool_name, tool_calls, created_at " +
+        "FROM messages WHERE session_id = ? ORDER BY id DESC LIMIT 1",
     );
     this.selectMessages = this.db.prepare(
-      "SELECT id, session_id, role, content, created_at FROM messages WHERE session_id = ? ORDER BY id ASC LIMIT ?",
+      "SELECT id, session_id, role, content, tool_call_id, tool_name, tool_calls, created_at " +
+        "FROM messages WHERE session_id = ? ORDER BY id ASC LIMIT ?",
+    );
+    this.selectSessions = this.db.prepare(
+      "SELECT id, channel, created_at, updated_at, metadata FROM sessions ORDER BY updated_at DESC LIMIT ?",
     );
   }
 
@@ -123,14 +193,41 @@ export class CarapaceStore {
     this.touchSessionStmt.run(Date.now(), id);
   }
 
-  appendMessage(sessionId: string, role: MessageRole, content: string): MessageRow {
+  appendMessage(
+    sessionId: string,
+    role: MessageRole,
+    content: string,
+    toolCallId: string | null = null,
+    toolName: string | null = null,
+    toolCalls: StoredToolCall[] | null = null,
+  ): MessageRow {
     this.ensureSession(sessionId);
-    this.insertMessage.run(sessionId, role, content, Date.now());
+    this.insertMessage.run(
+      sessionId,
+      role,
+      content,
+      toolCallId,
+      toolName,
+      toolCalls === null ? null : JSON.stringify(toolCalls),
+      Date.now(),
+    );
     const row = this.selectLastMessage.get(sessionId) as RawMessageRow | undefined;
     if (row === undefined) {
       throw new Error(`appendMessage: insert for session ${sessionId} did not persist`);
     }
     return toMessageRow(row);
+  }
+
+  /** Most recently updated sessions, newest first. */
+  listSessions(limit: number = 50): SessionRow[] {
+    const rows = this.selectSessions.all(limit) as RawSessionRow[];
+    return rows.map((row) => ({
+      id: row.id,
+      channel: row.channel,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      metadata: row.metadata,
+    }));
   }
 
   listMessages(sessionId: string, limit: number = 200): MessageRow[] {

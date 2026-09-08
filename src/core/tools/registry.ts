@@ -1,5 +1,6 @@
 // Tool registry — the toolbox the agent loop draws from.
-// M0: types plus an empty registry. Built-in tools (exec, files, web) land in M1.
+// Tools expose name/description/JSON-schema params plus an execute() the loop calls;
+// toSpecs() renders them for OpenAI-compatible function calling.
 
 export interface ToolParameterSchema {
   type: "string" | "number" | "boolean";
@@ -30,6 +31,12 @@ export interface ToolDefinition {
   execute(input: Record<string, unknown>, context: ToolContext): Promise<ToolResult>;
 }
 
+/** OpenAI-compatible wire shape for one tool offered to the model. */
+export interface ToolSpec {
+  type: "function";
+  function: { name: string; description: string; parameters: ToolInputSchema };
+}
+
 export class ToolRegistry {
   private readonly tools = new Map<string, ToolDefinition>();
 
@@ -45,8 +52,24 @@ export class ToolRegistry {
     return this.tools.get(name);
   }
 
+  has(name: string): boolean {
+    return this.tools.has(name);
+  }
+
   names(): string[] {
     return [...this.tools.keys()].sort();
+  }
+
+  /** Wire-ready tool specs in stable (alphabetical) order. */
+  toSpecs(): ToolSpec[] {
+    return this.names().map((name) => {
+      const tool = this.tools.get(name);
+      if (tool === undefined) throw new Error(`registry inconsistency: missing tool ${name}`);
+      return {
+        type: "function",
+        function: { name: tool.name, description: tool.description, parameters: tool.inputSchema },
+      };
+    });
   }
 
   get size(): number {

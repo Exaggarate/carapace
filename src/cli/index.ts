@@ -9,23 +9,25 @@ import { dirname, join } from "node:path";
 import {
   carapaceHome,
   ConfigError,
+  describeSecretValue,
   loadConfig,
+  resolveSecret,
   type CarapaceConfig,
   type LoadedConfig,
 } from "../config.js";
 import { ApiChannel } from "../gateway/channels/api.js";
 import { TelegramChannel } from "../gateway/channels/telegram.js";
-import type { ChannelAdapter } from "../gateway/channels/types.js";
-import { RouteTable, startGatewayServer } from "../gateway/server.js";
+import { buildRuntime } from "../gateway/runtime.js";
+import { startGatewayServer } from "../gateway/server.js";
 import { CarapaceStore } from "../storage/sqlite.js";
 import { VERSION } from "../version.js";
 
 const USAGE = `carapace v${VERSION} — independent multi-channel agent gateway
 
 Usage:
-  carapace gateway    start the gateway (config + channels + HTTP server)
-  carapace doctor     check node, config, directories, storage, channels
-  carapace models     list model providers (placeholder until M1)
+  carapace gateway    start the gateway (LLM + tools + channels + HTTP server)
+  carapace doctor     check node, config, directories, storage, llm, tools, channels
+  carapace models     show the configured model/provider
   carapace version    print the version
   carapace help       show this help
 
@@ -60,21 +62,21 @@ async function commandGateway(): Promise<number> {
   }
   for (const warning of loaded.warnings) console.warn(`warning: ${warning}`);
 
-  const store = new CarapaceStore(loaded.config.storage.path);
-  const routes = new RouteTable();
-  const channels: ChannelAdapter[] = [new ApiChannel(loaded.config), new TelegramChannel(loaded.config)];
-  for (const channel of channels) channel.mountRoutes?.(routes);
-
+  const runtime = buildRuntime({ config: loaded.config });
   const handle = await startGatewayServer({
     host: loaded.config.gateway.host,
     port: loaded.config.gateway.port,
-    routes,
+    routes: runtime.routes,
   });
 
   console.log(`🐢 carapace v${VERSION}`);
   console.log(`   gateway → http://${handle.host}:${handle.port} (health: GET /health)`);
   console.log(`   storage → ${loaded.config.storage.path}`);
-  for (const channel of channels) {
+  console.log(`   llm     → ${loaded.config.llm.model} @ ${loaded.config.llm.baseURL}`);
+  if (resolveSecret(loaded.config.llm.apiKey) === null) {
+    console.warn("   llm     → API key unresolved — agent turns will fail until llm.apiKey is set");
+  }
+  for (const channel of runtime.channels) {
     if (!channel.isConfigured()) {
       console.log(`   channel → ${channel.name}: not configured, skipped`);
       continue;
@@ -94,7 +96,7 @@ async function commandGateway(): Promise<number> {
     shuttingDown = true;
     console.log(`\nreceived ${signal}, shutting down…`);
     void (async () => {
-      for (const channel of channels) {
+      for (const channel of runtime.channels) {
         try {
           await channel.stop();
         } catch {
@@ -102,7 +104,7 @@ async function commandGateway(): Promise<number> {
         }
       }
       await handle.stop();
-      store.close();
+      runtime.close();
       process.exit(0);
     })();
   };
@@ -225,6 +227,32 @@ async function commandDoctor(): Promise<number> {
         detail: "no channel enabled — the gateway will only serve GET /health",
       });
     }
+
+    const llmKeyResolved = resolveSecret(config.llm.apiKey) !== null;
+    results.push({
+      name: "llm",
+      status: llmKeyResolved ? "ok" : "warn",
+      detail: `baseURL=${config.llm.baseURL}, model=${config.llm.model}, apiKey=${describeSecretValue(
+        config.llm.apiKey,
+      )}${llmKeyResolved ? "" : " (unresolved — agent turns will fail until it is set)"}`,
+    });
+
+    try {
+      for (const root of config.tools.allowedRoots) mkdirSync(root, { recursive: true });
+      results.push({
+        name: "tools",
+        status: "ok",
+        detail: `allowedRoots=${config.tools.allowedRoots.join(", ")}, exec timeout=${
+          config.tools.exec.timeoutMs
+        }ms, denylist=${config.tools.exec.denylist.length} pattern(s)`,
+      });
+    } catch (error) {
+      results.push({
+        name: "tools",
+        status: "warn",
+        detail: `allowedRoots not creatable: ${(error as Error).message}`,
+      });
+    }
   }
 
   const failed = results.filter((r) => r.status === "fail");
@@ -243,12 +271,18 @@ async function commandDoctor(): Promise<number> {
 }
 
 function commandModels(): number {
-  console.log("model providers — M0 placeholder (real providers land in M1):");
-  console.log("  - openai-compatible   POST /chat/completions   planned M1");
-  console.log("  - anthropic           /v1/messages             planned M1");
-  console.log("  - ollama              /api/chat (local)        planned M1");
+  const loaded = loadOrReport();
+  if (loaded === null) return 1;
+  const { config } = loaded;
+  console.log("model providers:");
+  console.log("  - openai-compatible   POST {llm.baseURL}/chat/completions   implemented (M1)");
+  console.log("  - anthropic           /v1/messages                          planned M2");
+  console.log("  - ollama native       /api/chat                             planned M2");
   console.log("");
-  console.log("configure via ~/.carapace/config.json → agent.model once a provider lands.");
+  console.log(
+    `configured: ${config.llm.model} @ ${config.llm.baseURL} (apiKey: ${describeSecretValue(config.llm.apiKey)})`,
+  );
+  console.log("any OpenAI-compatible endpoint works: OpenAI, Ollama (/v1), vLLM, LM Studio, OpenRouter, …");
   return 0;
 }
 

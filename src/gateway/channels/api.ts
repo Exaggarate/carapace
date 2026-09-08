@@ -1,8 +1,8 @@
-// Raw HTTP channel — M0 skeleton.
+// Raw HTTP channel.
 // Request contract (frozen at M0 so clients can build against it):
 //   POST /api/v1/messages  body: { "senderId": string, "text": string, "chatId"?: string }
 //   GET  /api/v1/channels  → channel status listing
-// Until the M1 agent loop exists, /api/v1/messages validates its body and answers 501.
+// Since M1 the message handler runs the real agent loop and replies in-band.
 
 import type { IncomingMessage } from "node:http";
 import { respondJson, RouteTable } from "../server.js";
@@ -55,7 +55,7 @@ export class ApiChannel implements ChannelAdapter {
   }
 
   describe(): string {
-    return `enabled=${this.config.channels.api.enabled}, endpoint=POST /api/v1/messages (501 until the M1 agent loop)`;
+    return `enabled=${this.config.channels.api.enabled}, endpoint=POST /api/v1/messages (agent loop live)`;
   }
 
   onMessage(handler: MessageHandler): void {
@@ -66,15 +66,12 @@ export class ApiChannel implements ChannelAdapter {
     if (!this.isConfigured()) {
       throw new Error("api channel is disabled in config (channels.api.enabled=false)");
     }
-    if (this.messageHandler !== null) {
-      // Wired; inbound POSTs will dispatch through it once M1 lands.
-    }
   }
 
   async stop(): Promise<void> {}
 
   async send(_chatId: string, _text: string): Promise<void> {
-    // The HTTP channel replies in-band (HTTP response), so push-send is a no-op at M0.
+    // The HTTP channel replies in-band (HTTP response), so push-send is a no-op.
   }
 
   mountRoutes(routes: RouteTable): void {
@@ -100,12 +97,24 @@ export class ApiChannel implements ChannelAdapter {
         });
         return;
       }
-      void senderId;
-      void text;
-      respondJson(response, 501, {
-        error: "not_implemented",
-        detail: "request contract frozen at M0; the agent loop that answers arrives in M1",
-      });
+      if (this.messageHandler === null) {
+        respondJson(response, 503, { error: "handler_unavailable" });
+        return;
+      }
+      const chatIdRaw = payload?.chatId;
+      const chatId = typeof chatIdRaw === "string" && chatIdRaw.trim() !== "" ? chatIdRaw : senderId;
+      try {
+        const reply = await this.messageHandler({
+          channel: "api",
+          senderId,
+          chatId,
+          text,
+          receivedAt: Date.now(),
+        });
+        respondJson(response, 200, { reply: reply?.text ?? "", channel: "api", chatId });
+      } catch (error) {
+        respondJson(response, 500, { error: "agent_turn_failed", detail: (error as Error).message });
+      }
     });
     routes.add("GET", "/api/v1/channels", (_request, response) => {
       respondJson(response, 200, {

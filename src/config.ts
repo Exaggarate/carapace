@@ -23,7 +23,8 @@ export interface GatewayConfig {
 
 export interface TelegramChannelConfig {
   enabled: boolean;
-  token: SecretValue;
+  /** Bot token from BotFather. Accepts a SecretRef; resolved at runtime, never logged. */
+  botToken: SecretValue;
   allowedSenders: string[];
 }
 
@@ -37,10 +38,29 @@ export interface ChannelsConfig {
 }
 
 export interface AgentConfig {
-  /** Provider-agnostic model id; concrete providers land in M1. */
-  model: string;
   systemPrompt: string;
   maxToolIterations: number;
+}
+
+/** OpenAI-compatible chat-completions endpoint (OpenAI, Ollama, vLLM, OpenRouter, …). */
+export interface LlmConfig {
+  /** e.g. https://api.openai.com/v1 — the provider appends /chat/completions. */
+  baseURL: string;
+  /** Bearer token. Accepts a SecretRef; resolved at runtime, never logged. */
+  apiKey: SecretValue;
+  model: string;
+  /** Per-request HTTP timeout in milliseconds. */
+  timeoutMs: number;
+}
+
+export interface ToolsConfig {
+  /** Filesystem roots the files tool may touch; also bounds the exec tool's cwd. */
+  allowedRoots: string[];
+  exec: {
+    timeoutMs: number;
+    /** Substrings that make the exec tool refuse a command (case-insensitive). */
+    denylist: string[];
+  };
 }
 
 export interface StorageConfig {
@@ -49,8 +69,10 @@ export interface StorageConfig {
 
 export interface CarapaceConfig {
   gateway: GatewayConfig;
+  llm: LlmConfig;
   channels: ChannelsConfig;
   agent: AgentConfig;
+  tools: ToolsConfig;
   storage: StorageConfig;
 }
 
@@ -123,15 +145,32 @@ export function describeSecretValue(value: SecretValue): string {
 
 export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
   return {
-    gateway: { host: "127.0.0.1", port: 8787 },
+    gateway: {
+      host: "127.0.0.1",
+      // Default 8899: 8787 is frequently occupied by unrelated services on shared
+      // hosts. Override via config or CARAPACE_GATEWAY_PORT.
+      port: 8899,
+    },
+    llm: {
+      baseURL: "https://api.openai.com/v1",
+      apiKey: { env: "CARAPACE_LLM_API_KEY" },
+      model: "gpt-4o-mini",
+      timeoutMs: 120_000,
+    },
     channels: {
-      telegram: { enabled: false, token: { env: "CARAPACE_TELEGRAM_TOKEN" }, allowedSenders: [] },
+      telegram: { enabled: false, botToken: { env: "CARAPACE_TELEGRAM_TOKEN" }, allowedSenders: [] },
       api: { enabled: true },
     },
     agent: {
-      model: "placeholder",
       systemPrompt: "You are Carapace, a helpful personal agent running on the owner's own hardware.",
-      maxToolIterations: 8,
+      maxToolIterations: 12,
+    },
+    tools: {
+      allowedRoots: [join(dir, "workspace")],
+      exec: {
+        timeoutMs: 30_000,
+        denylist: ["rm -rf /", "mkfs", ":(){ :|:& };:", "dd if=/dev/", "shutdown", "reboot", "halt"],
+      },
     },
     storage: { path: join(dir, "carapace.db") },
   };
@@ -250,7 +289,7 @@ export function validateConfig(raw: unknown): ValidationResult {
     return { config: defaults, errors: ["config root must be a JSON object"] };
   }
   const root = raw as Record<string, unknown>;
-  const knownSections = new Set(["gateway", "channels", "agent", "storage"]);
+  const knownSections = new Set(["gateway", "llm", "channels", "agent", "tools", "storage"]);
   for (const key of Object.keys(root)) {
     if (!knownSections.has(key)) errors.push(`unknown top-level section "${key}"`);
   }
@@ -264,10 +303,18 @@ export function validateConfig(raw: unknown): ValidationResult {
   const channelsRaw = asObjectOrEmpty(root.channels, "channels", errors);
   const telegramRaw = asObjectOrEmpty(channelsRaw.telegram, "channels.telegram", errors);
   const apiRaw = asObjectOrEmpty(channelsRaw.api, "channels.api", errors);
+  // M0 configs used `token`; keep accepting it as a fallback alias for botToken.
+  const botToken = readSecretValue(
+    telegramRaw,
+    "botToken",
+    "channels.telegram",
+    errors,
+    readSecretValue(telegramRaw, "token", "channels.telegram", errors, defaults.channels.telegram.botToken),
+  );
   const channels: ChannelsConfig = {
     telegram: {
       enabled: readBoolean(telegramRaw, "enabled", "channels.telegram", errors, defaults.channels.telegram.enabled),
-      token: readSecretValue(telegramRaw, "token", "channels.telegram", errors, defaults.channels.telegram.token),
+      botToken,
       allowedSenders: readStringArray(
         telegramRaw,
         "allowedSenders",
@@ -279,9 +326,36 @@ export function validateConfig(raw: unknown): ValidationResult {
     api: { enabled: readBoolean(apiRaw, "enabled", "channels.api", errors, defaults.channels.api.enabled) },
   };
 
+  const llmRaw = asObjectOrEmpty(root.llm, "llm", errors);
+  const llm: LlmConfig = {
+    baseURL: readString(llmRaw, "baseURL", "llm", errors, defaults.llm.baseURL),
+    apiKey: readSecretValue(llmRaw, "apiKey", "llm", errors, defaults.llm.apiKey),
+    model: readString(llmRaw, "model", "llm", errors, defaults.llm.model),
+    timeoutMs: readBoundedInt(llmRaw, "timeoutMs", "llm", errors, defaults.llm.timeoutMs, 5_000, 600_000),
+  };
+
+  const toolsRaw = asObjectOrEmpty(root.tools, "tools", errors);
+  const execRaw = asObjectOrEmpty(toolsRaw.exec, "tools.exec", errors);
+  const tools: ToolsConfig = {
+    allowedRoots: readStringArray(toolsRaw, "allowedRoots", "tools", errors, defaults.tools.allowedRoots).map(
+      expandTilde,
+    ),
+    exec: {
+      timeoutMs: readBoundedInt(
+        execRaw,
+        "timeoutMs",
+        "tools.exec",
+        errors,
+        defaults.tools.exec.timeoutMs,
+        1_000,
+        300_000,
+      ),
+      denylist: readStringArray(execRaw, "denylist", "tools.exec", errors, defaults.tools.exec.denylist),
+    },
+  };
+
   const agentRaw = asObjectOrEmpty(root.agent, "agent", errors);
   const agent: AgentConfig = {
-    model: readString(agentRaw, "model", "agent", errors, defaults.agent.model),
     systemPrompt: readString(agentRaw, "systemPrompt", "agent", errors, defaults.agent.systemPrompt),
     maxToolIterations: readBoundedInt(
       agentRaw,
@@ -299,7 +373,7 @@ export function validateConfig(raw: unknown): ValidationResult {
     path: expandTilde(readString(storageRaw, "path", "storage", errors, defaults.storage.path)),
   };
 
-  return { config: { gateway, channels, agent, storage }, errors };
+  return { config: { gateway, llm, channels, agent, tools, storage }, errors };
 }
 
 function parseEnvBoolean(name: string, raw: string, warnings: string[]): boolean | null {
@@ -326,8 +400,14 @@ function applyEnvOverrides(config: CarapaceConfig, warnings: string[]): void {
     else warnings.push(`ignoring ${ENV_PREFIX}GATEWAY_PORT="${portText}" — not an integer between 1 and 65535`);
   }
 
-  const model = env("AGENT_MODEL");
-  if (model !== undefined) config.agent.model = model;
+  const llmBaseUrl = env("LLM_BASE_URL");
+  if (llmBaseUrl !== undefined) config.llm.baseURL = llmBaseUrl;
+
+  const llmApiKey = env("LLM_API_KEY");
+  if (llmApiKey !== undefined) config.llm.apiKey = llmApiKey;
+
+  const llmModel = env("LLM_MODEL");
+  if (llmModel !== undefined) config.llm.model = llmModel;
 
   const storagePath = env("STORAGE_PATH");
   if (storagePath !== undefined) config.storage.path = expandTilde(storagePath);
@@ -339,7 +419,7 @@ function applyEnvOverrides(config: CarapaceConfig, warnings: string[]): void {
   }
 
   const telegramToken = env("TELEGRAM_TOKEN");
-  if (telegramToken !== undefined) config.channels.telegram.token = telegramToken;
+  if (telegramToken !== undefined) config.channels.telegram.botToken = telegramToken;
 
   const apiEnabled = env("API_ENABLED");
   if (apiEnabled !== undefined) {

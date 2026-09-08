@@ -41,6 +41,14 @@ declare module "node:fs" {
   export function readFileSync(path: string, encoding: "utf8"): string;
   export function writeFileSync(path: string, data: string, encoding?: string): void;
   export function unlinkSync(path: string): void;
+  export function readdirSync(path: string): string[];
+  export function realpathSync(path: string): string;
+  export interface Stats {
+    isDirectory(): boolean;
+    isFile(): boolean;
+    size: number;
+  }
+  export function statSync(path: string): Stats;
 }
 
 declare module "node:path" {
@@ -105,4 +113,85 @@ declare class TextDecoder {
   constructor(encoding?: string);
   readonly encoding: string;
   decode(input?: Uint8Array | ArrayBuffer, options?: { stream?: boolean }): string;
+}
+
+// --- timers ---
+
+declare function setTimeout(handler: (...args: unknown[]) => void, timeout?: number, ...args: unknown[]): unknown;
+declare function clearTimeout(id: unknown): void;
+
+// --- fetch stack (Node >= 18 globals) ---
+
+declare class AbortSignal {
+  static timeout(milliseconds: number): AbortSignal;
+  readonly aborted: boolean;
+  addEventListener(type: string, listener: () => void, options?: { once?: boolean }): void;
+}
+
+declare class AbortController {
+  readonly signal: AbortSignal;
+  abort(reason?: unknown): void;
+}
+
+declare class URL {
+  constructor(input: string | URL, base?: string | URL);
+  readonly href: string;
+  readonly protocol: string;
+  readonly host: string;
+  readonly hostname: string;
+  readonly pathname: string;
+  readonly search: string;
+  toString(): string;
+}
+
+interface ResponseHeaders {
+  get(name: string): string | null;
+}
+
+interface Response {
+  readonly ok: boolean;
+  readonly status: number;
+  readonly statusText: string;
+  readonly headers: ResponseHeaders;
+  text(): Promise<string>;
+  json(): Promise<unknown>;
+}
+
+interface RequestInit {
+  method?: string;
+  headers?: Record<string, string>;
+  body?: string;
+  signal?: AbortSignal;
+}
+
+declare function fetch(input: string | URL, init?: RequestInit): Promise<Response>;
+
+// --- child processes ---
+
+declare module "node:child_process" {
+  export interface Readable {
+    on(event: "data", listener: (chunk: string | Uint8Array) => void): Readable;
+    on(event: "end", listener: () => void): Readable;
+    on(event: "error", listener: (error: Error) => void): Readable;
+    setEncoding(encoding: "utf8" | "utf-8"): Readable;
+  }
+
+  export interface ChildProcess {
+    stdout: Readable | null;
+    stderr: Readable | null;
+    on(event: "close", listener: (code: number | null, signal: string | null) => void): ChildProcess;
+    on(event: "error", listener: (error: Error) => void): ChildProcess;
+    on(event: string, listener: (...args: unknown[]) => void): ChildProcess;
+    kill(signal?: string): boolean;
+  }
+
+  export interface SpawnOptions {
+    shell?: boolean | string;
+    cwd?: string;
+    timeout?: number;
+    killSignal?: string;
+    env?: Record<string, string | undefined>;
+  }
+
+  export function spawn(command: string, options?: SpawnOptions): ChildProcess;
 }
