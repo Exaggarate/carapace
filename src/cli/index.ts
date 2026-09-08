@@ -18,7 +18,9 @@ import {
 import { ApiChannel } from "../gateway/channels/api.js";
 import { DiscordChannel, probeDiscordToken } from "../gateway/channels/discord.js";
 import { TelegramChannel } from "../gateway/channels/telegram.js";
+import { DEFAULT_START_MESSAGE } from "../gateway/commands.js";
 import { customThemeFilePath, validateThemeCss } from "../gateway/dashboard.js";
+import { markdownToTelegramHtml, TELEGRAM_MESSAGE_LIMIT, validateTelegramMarkdown } from "../gateway/format.js";
 import { scanPlugins } from "../gateway/plugins.js";
 import { buildRuntime, describeProviderChain } from "../gateway/runtime.js";
 import { startGatewayServer } from "../gateway/server.js";
@@ -27,6 +29,7 @@ import { fileToolsDir, loadFileToolDefs } from "../core/tools/custom.js";
 import { probeProviderEndpoint, type ProviderProbeResult } from "../core/llm.js";
 import { nextRunMs, parseSchedule, ScheduleError } from "../core/schedule.js";
 import { MemoryStore, todayIsoDate } from "../core/memory.js";
+import { personaForChannel } from "../core/persona.js";
 import { carapaceSkillsDir, loadSkillsFromDir, SkillRegistry } from "../core/skills.js";
 import { CarapaceStore, type AutomationRow } from "../storage/sqlite.js";
 import { VERSION } from "../version.js";
@@ -383,6 +386,51 @@ async function commandDoctor(): Promise<number> {
         detail: `theme=${themeName} (built-in preset; ui.theme="custom" loads a stylesheet from ui.themeFile)`,
       });
     }
+
+    // Conversational UX (M11): the /start welcome must convert cleanly for the
+    // Telegram HTML parse mode, and every channel must resolve a persona.
+    const startMessageText = config.channels.telegram.startMessage ?? DEFAULT_START_MESSAGE;
+    const startVerdict = validateTelegramMarkdown(startMessageText);
+    const startHtmlLength = startVerdict.ok ? markdownToTelegramHtml(startMessageText).length : 0;
+    results.push(
+      startVerdict.ok && startHtmlLength <= TELEGRAM_MESSAGE_LIMIT
+        ? {
+            name: "telegram:start-message",
+            status: "ok",
+            detail:
+              `${config.channels.telegram.startMessage === undefined ? "crafted default" : "custom"} message ` +
+              `(${startMessageText.length} chars → ${startHtmlLength} HTML entities)`,
+          }
+        : {
+            name: "telegram:start-message",
+            status: "fail",
+            detail:
+              startVerdict.reason ??
+              `converted message exceeds the ${TELEGRAM_MESSAGE_LIMIT}-char Telegram limit (${startHtmlLength})`,
+          },
+    );
+
+    // Persona layer (M11): each channel resolves to either its custom override or
+    // the crafted default — anything empty is a config bug, oversized blocks waste
+    // every turn's context window.
+    const personaChannels = ["telegram", "discord", "api"] as const;
+    const personaDetails = personaChannels.map((channel) => {
+      const persona = personaForChannel(config, channel);
+      const origin = persona === (config.channels[channel]?.persona ?? "") && persona !== "" ? "custom" : "default";
+      return `${channel}: ${origin} (${persona.length} chars)`;
+    });
+    const oversizedPersonas = personaChannels.filter(
+      (channel) => personaForChannel(config, channel).length > 8000,
+    );
+    results.push({
+      name: "persona",
+      status: oversizedPersonas.length > 0 ? "warn" : "ok",
+      detail:
+        personaDetails.join(", ") +
+        (oversizedPersonas.length > 0
+          ? ` — oversized persona on ${oversizedPersonas.join(", ")}; trim it to save context per turn`
+          : ""),
+    });
 
     // Plugin-UI foundation (#66944): loaded plugins + manifest problems as warnings.
     const pluginScan = scanPlugins(config);
