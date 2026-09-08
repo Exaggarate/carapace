@@ -4,12 +4,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
 
-import { loadSkillsFromDir, parseSkillMd, SkillRegistry } from "../dist/core/skills.js";
+import { loadSkillsFromDir, parseSkillMd, runSkillSetup, skillSetupState, SkillRegistry } from "../dist/core/skills.js";
 import { runAgentTurn } from "../dist/core/agent.js";
 import { createBuiltinTools } from "../dist/core/tools/builtins/index.js";
 import { SessionStore } from "../dist/core/session.js";
@@ -216,4 +216,67 @@ test("doctor surfaces the skills check and stays healthy on a broken skill", asy
   assert.match(checked.stdout, /\[warn\] skills/);
   assert.match(checked.stdout, /frontmatter/);
   assert.match(checked.stdout, /verdict: healthy/);
+});
+
+// ── Setup hooks (#80213) ───────────────────────────────────────────────────
+
+test("setup hook: parses the setup frontmatter key and runs the script once", async () => {
+  const root = tempRoot();
+  mkdirSync(join(root, "hooked", "scripts"), { recursive: true });
+  writeFileSync(join(root, "hooked", "scripts", "init.sh"), "#!/bin/sh\nprintf done > out.txt\n", "utf8");
+  chmodSync(join(root, "hooked", "scripts", "init.sh"), 0o755);
+  writeSkill(root, "hooked", "---\nname: hooked\ndescription: skill with a setup hook\nsetup: scripts/init.sh\n---\n\nbody\n");
+  const { skills } = loadSkillsFromDir(root);
+  const skill = skills[0];
+  assert.equal(skill?.setup, "scripts/init.sh");
+  assert.equal(skillSetupState(skill), "pending");
+  const outcome = await runSkillSetup(skill);
+  assert.equal(outcome.ok, true, outcome.detail);
+  assert.equal(skillSetupState(skill), "complete");
+  assert.equal(readFileSync(join(root, "hooked", "out.txt"), "utf8"), "done");
+  assert.ok(existsSync(join(root, "hooked", ".setup-complete")));
+});
+
+test("setup hook: a failing script stays pending and reports the output", async () => {
+  const root = tempRoot();
+  writeSkill(root, "failing", "---\nname: failing\ndescription: failing hook\nsetup: setup.sh\n---\n\nbody\n");
+  writeFileSync(join(root, "failing", "setup.sh"), "#!/bin/sh\necho boom >&2\nexit 3\n", "utf8");
+  chmodSync(join(root, "failing", "setup.sh"), 0o755);
+  const { skills } = loadSkillsFromDir(root);
+  const skill = skills[0];
+  const outcome = await runSkillSetup(skill);
+  assert.equal(outcome.ok, false);
+  assert.match(outcome.detail, /exit code 3/);
+  assert.match(outcome.detail, /boom/);
+  assert.equal(skillSetupState(skill), "pending");
+  assert.equal(existsSync(join(root, "failing", ".setup-complete")), false);
+});
+
+test("setup hook: refuses scripts that escape the skill directory", async () => {
+  const root = tempRoot();
+  writeSkill(root, "escapee", "---\nname: escapee\ndescription: traversal hook\nsetup: ../outside.sh\n---\n\nbody\n");
+  const { skills } = loadSkillsFromDir(root);
+  const skill = skills[0];
+  const outcome = await runSkillSetup(skill);
+  assert.equal(outcome.ok, false);
+  assert.match(outcome.detail, /refused/);
+});
+
+test("setup hook: CLI shows pending state and runs the hook to completion", async () => {
+  const home = mkdtempSync(join(tmpdir(), "carapace-skills-hook-"));
+  mkdirSync(join(home, "skills", "cli-hooked"), { recursive: true });
+  writeFileSync(join(home, "skills", "cli-hooked", "setup.sh"), "#!/bin/sh\nexit 0\n", "utf8");
+  chmodSync(join(home, "skills", "cli-hooked", "setup.sh"), 0o755);
+  writeFileSync(
+    join(home, "skills", "cli-hooked", "SKILL.md"),
+    "---\nname: cli-hooked\ndescription: cli hook test\nsetup: setup.sh\n---\n\nbody\n",
+    "utf8",
+  );
+  const env = { ...process.env, CARAPACE_HOME: home };
+  const listed = await run("node", ["dist/cli/index.js", "skills", "list"], { env });
+  assert.match(listed.stdout, /\[setup: pending\]/);
+  const setup = await run("node", ["dist/cli/index.js", "skills", "setup", "cli-hooked"], { env });
+  assert.match(setup.stdout, /completed/);
+  const relisted = await run("node", ["dist/cli/index.js", "skills", "list"], { env });
+  assert.match(relisted.stdout, /\[setup: complete\]/);
 });

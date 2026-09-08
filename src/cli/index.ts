@@ -30,7 +30,7 @@ import { probeProviderEndpoint, type ProviderProbeResult } from "../core/llm.js"
 import { nextRunMs, parseSchedule, ScheduleError } from "../core/schedule.js";
 import { MemoryStore, todayIsoDate } from "../core/memory.js";
 import { personaForChannel } from "../core/persona.js";
-import { carapaceSkillsDir, loadSkillsFromDir, SkillRegistry } from "../core/skills.js";
+import { carapaceSkillsDir, loadSkillsFromDir, runSkillSetup, skillSetupState, SkillRegistry } from "../core/skills.js";
 import { CarapaceStore, type AutomationRow } from "../storage/sqlite.js";
 import { VERSION } from "../version.js";
 
@@ -40,7 +40,7 @@ Usage:
   carapace gateway    start the gateway (LLM + tools + skills + channels + automations + HTTP server)
   carapace doctor     check node, config, directories, storage, llm, tools, skills, channels, scheduler
   carapace models     show the configured model/provider chain
-  carapace skills     skills list | skills path <name> — installed skill playbooks
+  carapace skills     skills list | path <name> | setup <name|all> — installed skill playbooks
   carapace automations  list | add (--at ISO | --every DURATION | --cron EXPR) --prompt TEXT --chat CHANNEL:CHATID
                         remove <id|name> | run <id|name> — scheduled jobs (M8)
   carapace version    print the version
@@ -472,14 +472,20 @@ async function commandDoctor(): Promise<number> {
 
     // Skills (M7): count + parse problems. A broken skill only warns — a bad file
     // must never take the gateway down, and doctor says exactly what to fix.
+    // Setup hooks (#80213) are reported read-only: pending never ran (or last
+    // failed) — doctor points at the command, never executes hooks itself.
     const skillsRoot = carapaceSkillsDir();
     const skillScan = loadSkillsFromDir(skillsRoot);
+    const pendingSetup = skillScan.skills.filter((skill) => skillSetupState(skill) === "pending");
     results.push({
       name: "skills",
-      status: skillScan.issues.length > 0 ? "warn" : "ok",
+      status: skillScan.issues.length > 0 || pendingSetup.length > 0 ? "warn" : "ok",
       detail:
         `${skillScan.skills.length} skill(s) in ${skillsRoot}` +
-        (skillScan.issues.length > 0 ? ` — ${skillScan.issues.join("; ")}` : ""),
+        (skillScan.issues.length > 0 ? ` — ${skillScan.issues.join("; ")}` : "") +
+        (pendingSetup.length > 0
+          ? ` — setup hook pending on ${pendingSetup.map((skill) => skill.name).join(", ")}: run carapace skills setup all`
+          : ""),
     });
 
     // Automations (M8): persisted jobs — counts, enabled, next due.
@@ -570,7 +576,7 @@ function commandModels(): number {
   return 0;
 }
 
-function commandSkills(argv: string[]): number {
+async function commandSkills(argv: string[]): Promise<number> {
   const sub = argv[0] ?? "list";
   const root = carapaceSkillsDir();
   if (sub === "list") {
@@ -582,7 +588,9 @@ function commandSkills(argv: string[]): number {
     }
     console.log(`skills (${result.skills.length}) from ${root}:`);
     for (const skill of result.skills) {
-      console.log(`  - ${skill.name} — ${skill.description}`);
+      const setup = skillSetupState(skill);
+      const setupLabel = setup === "none" ? "" : ` [setup: ${setup}]`;
+      console.log(`  - ${skill.name} — ${skill.description}${setupLabel}`);
       console.log(`      ${skill.path}`);
     }
     for (const issue of result.issues) console.warn(`  ! ${issue}`);
@@ -602,7 +610,41 @@ function commandSkills(argv: string[]): number {
     console.log(skill.path);
     return 0;
   }
-  console.error(`unknown skills subcommand: "${sub}" (expected "list" or "path")`);
+  if (sub === "setup") {
+    const target = argv[1] ?? "";
+    if (target === "") {
+      console.error("usage: carapace skills setup <name|all> — run a skill's author-declared setup hook (setup: frontmatter key)");
+      return 2;
+    }
+    const result = loadSkillsFromDir(root);
+    if (target === "all" || target === "--all") {
+      const hooks = result.skills.filter((skill) => skillSetupState(skill) !== "none");
+      if (hooks.length === 0) {
+        console.log("no skills declare a setup hook (add \"setup: <script>\" to SKILL.md frontmatter)");
+        return 0;
+      }
+      let failures = 0;
+      for (const skill of hooks) {
+        const outcome = await runSkillSetup(skill);
+        console.log(`${outcome.ok ? "ok  " : "FAIL"} ${outcome.skill}: ${outcome.detail}`);
+        if (!outcome.ok) failures += 1;
+      }
+      return failures === 0 ? 0 : 1;
+    }
+    const skill = result.skills.find((candidate) => candidate.name === target);
+    if (skill === undefined) {
+      console.error(`unknown skill "${target}" — see installed skills: carapace skills list`);
+      return 1;
+    }
+    if (skillSetupState(skill) === "none") {
+      console.error(`skill "${skill.name}" declares no setup hook (add "setup: <script>" to SKILL.md frontmatter)`);
+      return 2;
+    }
+    const outcome = await runSkillSetup(skill);
+    console.log(`${outcome.ok ? "ok" : "FAIL"} ${outcome.skill}: ${outcome.detail}`);
+    return outcome.ok ? 0 : 1;
+  }
+  console.error(`unknown skills subcommand: "${sub}" (expected "list", "path", or "setup")`);
   return 2;
 }
 
@@ -878,7 +920,7 @@ export async function main(argv: string[]): Promise<number> {
     case "models":
       return commandModels();
     case "skills":
-      return commandSkills(argv.slice(1));
+      return await commandSkills(argv.slice(1));
     case "automations":
       return await commandAutomations(argv.slice(1));
     case "version":
