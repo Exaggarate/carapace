@@ -117,6 +117,12 @@ function parseToolCalls(raw: string | null): StoredToolCall[] | null {
   return calls.length > 0 ? calls : null;
 }
 
+/** Normalize a `SELECT COUNT(*)` result row (bigint or number) to a plain number. */
+function countCountRow(row: unknown): number {
+  const n = (row as { n?: number | bigint } | undefined)?.n;
+  return typeof n === "bigint" ? Number(n) : typeof n === "number" ? n : 0;
+}
+
 function toMessageRow(row: RawMessageRow): MessageRow {
   return {
     id: row.id,
@@ -141,6 +147,9 @@ export class CarapaceStore {
   private readonly selectSessions: StatementSync;
   private readonly deleteSessionStmt: StatementSync;
   private readonly countMessagesStmt: StatementSync;
+  private readonly countSessionsStmt: StatementSync;
+  private readonly countAllMessagesStmt: StatementSync;
+  private readonly selectRecentMessages: StatementSync;
   private readonly getChannelStateStmt: StatementSync;
   private readonly setChannelStateStmt: StatementSync;
 
@@ -183,6 +192,12 @@ export class CarapaceStore {
     );
     this.deleteSessionStmt = this.db.prepare("DELETE FROM sessions WHERE id = ?");
     this.countMessagesStmt = this.db.prepare("SELECT COUNT(*) AS n FROM messages WHERE session_id = ?");
+    this.countSessionsStmt = this.db.prepare("SELECT COUNT(*) AS n FROM sessions");
+    this.countAllMessagesStmt = this.db.prepare("SELECT COUNT(*) AS n FROM messages");
+    this.selectRecentMessages = this.db.prepare(
+      "SELECT id, session_id, role, content, tool_call_id, tool_name, tool_calls, created_at " +
+        "FROM messages WHERE session_id = ? ORDER BY id DESC LIMIT ?",
+    );
     this.getChannelStateStmt = this.db.prepare("SELECT value FROM channel_state WHERE key = ?");
     this.setChannelStateStmt = this.db.prepare(
       "INSERT INTO channel_state (key, value, updated_at) VALUES (?, ?, ?) " +
@@ -264,6 +279,22 @@ export class CarapaceStore {
     const row = this.countMessagesStmt.get(sessionId) as { n?: number | bigint } | undefined;
     const n = row?.n;
     return typeof n === "bigint" ? Number(n) : typeof n === "number" ? n : 0;
+  }
+
+  /** Most recent messages of a session, returned oldest → newest (dashboard view, #28300). */
+  listRecentMessages(sessionId: string, limit: number = 100): MessageRow[] {
+    const rows = this.selectRecentMessages.all(sessionId, limit) as RawMessageRow[];
+    return rows.map(toMessageRow).reverse();
+  }
+
+  /** Total persisted sessions across all channels (dashboard status). */
+  countSessions(): number {
+    return countCountRow(this.countSessionsStmt.get());
+  }
+
+  /** Total persisted messages across all sessions (dashboard status). */
+  countAllMessages(): number {
+    return countCountRow(this.countAllMessagesStmt.get());
   }
 
   /** Channel bookkeeping value (e.g. Telegram update offsets); null when unset. */

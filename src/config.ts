@@ -125,6 +125,20 @@ export interface StorageConfig {
   path: string;
 }
 
+/** Built-in dashboard themes; "custom" switches to the ui.themeFile stylesheet (#28300). */
+export const UI_THEMES = ["dark", "light", "lobster-red", "carapace-amber", "custom"] as const;
+
+/** Dashboard + theming (#28300). */
+export interface UiConfig {
+  /**
+   * Dashboard theme: a built-in preset (dark, light, lobster-red, carapace-amber)
+   * or "custom" to inline the ui.themeFile stylesheet.
+   */
+  theme: (typeof UI_THEMES)[number];
+  /** CSS file inlined when theme="custom" (tilde allowed). */
+  themeFile: string;
+}
+
 export interface CarapaceConfig {
   gateway: GatewayConfig;
   llm: LlmConfig;
@@ -134,6 +148,8 @@ export interface CarapaceConfig {
   /** Per-sender routing table (#81271): sender/chat → tool allowlist + model override. */
   senders: SenderRouteConfig[];
   storage: StorageConfig;
+  /** Dashboard appearance (#28300); runtime consumers must tolerate hand-built configs without it. */
+  ui: UiConfig;
 }
 
 export interface LoadedConfig {
@@ -247,6 +263,10 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
       },
     },
     storage: { path: join(dir, "carapace.db") },
+    ui: {
+      theme: "dark",
+      themeFile: join(dir, "theme.css"),
+    },
   };
 }
 
@@ -383,7 +403,7 @@ export function validateConfig(raw: unknown): ValidationResult {
     return { config: defaults, errors: ["config root must be a JSON object"] };
   }
   const root = raw as Record<string, unknown>;
-  const knownSections = new Set(["gateway", "llm", "channels", "agent", "tools", "storage", "senders"]);
+  const knownSections = new Set(["gateway", "llm", "channels", "agent", "tools", "storage", "senders", "ui"]);;
   for (const key of Object.keys(root)) {
     if (!knownSections.has(key)) errors.push(`unknown top-level section "${key}"`);
   }
@@ -564,7 +584,23 @@ export function validateConfig(raw: unknown): ValidationResult {
     path: expandTilde(readString(storageRaw, "path", "storage", errors, defaults.storage.path)),
   };
 
-  return { config: { gateway, llm, channels, agent, tools, senders, storage }, errors };
+  // Dashboard theming (#28300): theme must be a known preset or "custom"; themeFile is
+  // the stylesheet inlined when theme="custom".
+  const uiRaw = asObjectOrEmpty(root.ui, "ui", errors);
+  let uiTheme = defaults.ui.theme;
+  if (uiRaw.theme !== undefined) {
+    if (typeof uiRaw.theme === "string" && (UI_THEMES as readonly string[]).includes(uiRaw.theme)) {
+      uiTheme = uiRaw.theme as UiConfig["theme"];
+    } else {
+      errors.push(`ui.theme must be one of: ${UI_THEMES.join(", ")}`);
+    }
+  }
+  const ui: UiConfig = {
+    theme: uiTheme,
+    themeFile: expandTilde(readString(uiRaw, "themeFile", "ui", errors, defaults.ui.themeFile)),
+  };
+
+  return { config: { gateway, llm, channels, agent, tools, senders, storage, ui }, errors };
 }
 
 function parseEnvBoolean(name: string, raw: string, warnings: string[]): boolean | null {
@@ -650,6 +686,15 @@ function applyEnvOverrides(config: CarapaceConfig, warnings: string[]): void {
 
   const storagePath = env("STORAGE_PATH");
   if (storagePath !== undefined) config.storage.path = expandTilde(storagePath);
+
+  // Dashboard theme override (#28300): CARAPACE_UI_THEME="light" etc.
+  const uiTheme = env("UI_THEME");
+  if (uiTheme !== undefined) {
+    if ((UI_THEMES as readonly string[]).includes(uiTheme)) config.ui.theme = uiTheme as UiConfig["theme"];
+    else {
+      warnings.push(`ignoring ${ENV_PREFIX}UI_THEME="${uiTheme}" — expected one of: ${UI_THEMES.join(", ")}`);
+    }
+  }
 
   const telegramEnabled = env("TELEGRAM_ENABLED");
   if (telegramEnabled !== undefined) {

@@ -2,7 +2,7 @@
 // carapace CLI. M0 commands: gateway | doctor | models | version | help.
 // No argument-parsing dependency — the surface is four words.
 
-import { mkdirSync, unlinkSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
@@ -17,6 +17,7 @@ import {
 } from "../config.js";
 import { ApiChannel } from "../gateway/channels/api.js";
 import { TelegramChannel } from "../gateway/channels/telegram.js";
+import { customThemeFilePath, validateThemeCss } from "../gateway/dashboard.js";
 import { buildRuntime } from "../gateway/runtime.js";
 import { startGatewayServer } from "../gateway/server.js";
 import { createBuiltinToolRegistry } from "../core/tools/builtins/index.js";
@@ -73,6 +74,7 @@ async function commandGateway(): Promise<number> {
 
   console.log(`🐢 carapace v${VERSION}`);
   console.log(`   gateway → http://${handle.host}:${handle.port} (health: GET /health)`);
+  console.log(`   ui      → http://${handle.host}:${handle.port}/ui (theme: ${loaded.config.ui.theme})`);
   console.log(`   storage → ${loaded.config.storage.path}`);
   console.log(`   llm     → ${loaded.config.llm.model} @ ${loaded.config.llm.baseURL}`);
   if (resolveSecret(loaded.config.llm.apiKey) === null) {
@@ -283,6 +285,34 @@ async function commandDoctor(): Promise<number> {
         config.llm.apiKey,
       )}${llmKeyResolved ? "" : " (unresolved — agent turns will fail until it is set)"}`,
     });
+
+    // Dashboard theming (#28300): presets are always valid; "custom" needs a readable,
+    // CSS-shaped theme file — an unreadable or invalid one fails the check.
+    const themeName = config.ui?.theme ?? "dark";
+    if (themeName === "custom") {
+      const themePath = customThemeFilePath(config);
+      try {
+        const css = readFileSync(themePath, "utf8");
+        const verdict = validateThemeCss(css);
+        results.push(
+          verdict.ok
+            ? { name: "ui:theme", status: "ok", detail: `custom theme ${themePath} (${css.length} bytes)` }
+            : { name: "ui:theme", status: "fail", detail: `${themePath}: ${verdict.reason}` },
+        );
+      } catch (error) {
+        results.push({
+          name: "ui:theme",
+          status: "fail",
+          detail: `${themePath}: ${(error as Error).message}`,
+        });
+      }
+    } else {
+      results.push({
+        name: "ui:theme",
+        status: "ok",
+        detail: `theme=${themeName} (built-in preset; ui.theme="custom" loads a stylesheet from ui.themeFile)`,
+      });
+    }
 
     try {
       for (const root of config.tools.allowedRoots) mkdirSync(root, { recursive: true });

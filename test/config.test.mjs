@@ -185,3 +185,24 @@ test("senders routing table validation (#81271)", () => {
   // non-object entry, bad match, no overrides, bad allowTools, bad model, duplicate
   assert.equal(bad.errors.length, 6);
 });
+test("ui section: theme presets validated, defaults applied (#28300)", () => {
+  const bad = validateConfig({ ui: { theme: "neon" } });
+  assert.equal(bad.errors.length, 1);
+  assert.ok(bad.errors[0].includes("ui.theme"));
+
+  const preset = validateConfig({ ui: { theme: "lobster-red", themeFile: "~/themes/mine.css" } });
+  assert.equal(preset.errors.length, 0);
+  assert.equal(preset.config.ui.theme, "lobster-red");
+  assert.ok(preset.config.ui.themeFile.startsWith("/"), "themeFile is tilde-expanded");
+
+  const defaults = validateConfig({});
+  assert.equal(defaults.config.ui.theme, "dark");
+  assert.ok(defaults.config.ui.themeFile.endsWith("theme.css"));
+
+  const custom = validateConfig({ ui: { theme: "custom" } });
+  assert.equal(custom.errors.length, 0);
+  assert.equal(custom.config.ui.theme, "custom");
+
+  const badType = validateConfig({ ui: { theme: 42 } });
+  assert.equal(badType.errors.length, 1);
+});

@@ -36,7 +36,7 @@ export function requestAuthorized(config: CarapaceConfig, request: IncomingMessa
   return timingSafeEqual(provided, required);
 }
 
-function respondUnauthorized(response: ServerResponse): void {
+export function respondUnauthorized(response: ServerResponse): void {
   response.writeHead(401, {
     "content-type": "application/json; charset=utf-8",
     "www-authenticate": 'Bearer realm="carapace-api"',
@@ -44,7 +44,7 @@ function respondUnauthorized(response: ServerResponse): void {
   response.end(JSON.stringify({ error: "unauthorized" }));
 }
 
-async function readJsonBody(request: IncomingMessage): Promise<BodyRead> {
+export async function readJsonBody(request: IncomingMessage): Promise<BodyRead> {
   const decoder = new TextDecoder();
   const chunks: Uint8Array[] = [];
   let size = 0;

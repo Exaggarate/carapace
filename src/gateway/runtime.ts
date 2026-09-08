@@ -10,6 +10,7 @@ import { CarapaceStore } from "../storage/sqlite.js";
 import { ApiChannel } from "./channels/api.js";
 import { TelegramChannel, type OffsetPersistence, type TelegramChannelOptions } from "./channels/telegram.js";
 import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler } from "./channels/types.js";
+import { mountDashboardRoutes } from "./dashboard.js";
 import { RouteTable } from "./server.js";
 
 export interface RuntimeOptions {
@@ -227,6 +228,14 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
 
   const routes = new RouteTable();
   for (const channel of channels) channel.mountRoutes?.(routes);
+  // Web dashboard + theme system (#28300): /ui plus its status/config/messages/reset
+  // endpoints, backed by the same store, sessions, and bearer-auth model.
+  mountDashboardRoutes(routes, {
+    config,
+    sessions: agent.sessions,
+    store,
+    channels,
+  });
   for (const channel of channels) channel.onMessage(handleMessage);
 
   return {
