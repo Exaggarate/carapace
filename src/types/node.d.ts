@@ -121,10 +121,15 @@ declare class TextEncoder {
   encode(input?: string): Uint8Array;
 }
 
-// --- crypto (constant-time secret comparison) ---
+// --- crypto (constant-time secret comparison, setup-hook markers) ---
 
 declare module "node:crypto" {
   export function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean;
+  export interface Hash {
+    update(data: string): Hash;
+    digest(encoding: "hex"): string;
+  }
+  export function createHash(algorithm: string): Hash;
 }
 
 // --- timers ---
@@ -209,4 +214,22 @@ declare module "node:child_process" {
   }
 
   export function spawn(command: string, options?: SpawnOptions): ChildProcess;
+  export function spawn(command: string, args: string[], options?: SpawnOptions): ChildProcess;
+
+  export interface SpawnSyncOptions {
+    cwd?: string;
+    timeout?: number;
+    killSignal?: string;
+    encoding?: string;
+  }
+
+  export interface SpawnSyncResult {
+    status: number | null;
+    signal: string | null;
+    error?: Error;
+    stdout: string;
+    stderr: string;
+  }
+
+  export function spawnSync(command: string, args: string[], options?: SpawnSyncOptions): SpawnSyncResult;
 }

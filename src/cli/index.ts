@@ -19,7 +19,8 @@ import { ApiChannel } from "../gateway/channels/api.js";
 import { TelegramChannel } from "../gateway/channels/telegram.js";
 import { buildRuntime } from "../gateway/runtime.js";
 import { startGatewayServer } from "../gateway/server.js";
-import { createBuiltinTools } from "../core/tools/builtins/index.js";
+import { createBuiltinToolRegistry } from "../core/tools/builtins/index.js";
+import { fileToolsDir, loadFileToolDefs } from "../core/tools/custom.js";
 import { CarapaceStore } from "../storage/sqlite.js";
 import { VERSION } from "../version.js";
 
@@ -251,7 +252,7 @@ async function commandDoctor(): Promise<number> {
     }
 
     if (config.senders.length > 0) {
-      const toolNames = createBuiltinTools(config).names();
+      const toolNames = createBuiltinToolRegistry(config).names();
       const unknown = config.senders.flatMap((route, index) =>
         (route.allowTools ?? [])
           .filter((name) => !toolNames.includes(name))
@@ -299,6 +300,16 @@ async function commandDoctor(): Promise<number> {
         detail: `allowedRoots not creatable: ${(error as Error).message}`,
       });
     }
+
+    // File-defined tools are validated read-only here — doctor never runs setup hooks.
+    const fileTools = loadFileToolDefs(fileToolsDir());
+    results.push({
+      name: "tools:custom",
+      status: fileTools.issues.length > 0 ? "warn" : "ok",
+      detail:
+        `${fileTools.defs.length} file-defined tool(s) in ${fileToolsDir()}` +
+        (fileTools.issues.length > 0 ? ` — ${fileTools.issues.join("; ")}` : ""),
+    });
   }
 
   const failed = results.filter((r) => r.status === "fail");
