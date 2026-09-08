@@ -12,7 +12,7 @@ opposite: the operator (you) owns the machine, the config, the secrets, and the 
 accounts. The gateway's job is to connect those chats to an agent loop with tools —
 reliably, transparently, and without phoning home.
 
-## Architecture at M2
+## Architecture at M3
 
 ```
 src/
@@ -24,6 +24,7 @@ src/
 │   ├── session.ts        SessionStore: identity, history, context assembly, deletion
 │   └── tools/
 │       ├── registry.ts   tool registry + OpenAI function specs
+│       ├── custom.ts     file-defined tools (~/.carapace/tools) + once-only setup hooks
 │       └── builtins/     exec (timeout + denylist), files (root confinement), web_fetch
 ├── gateway/
 │   ├── server.ts         node:http server, /health, route table (500-on-throw)
@@ -84,6 +85,90 @@ whatever was still in flight — never loss. Redelivered ids already known to th
 are re-confirmed without re-processing. The SQLite database runs in WAL journal mode, so
 committed state survives crashes without losing tail writes.
 
+### Turn budget and stall watchdog (#68596)
+
+Two `llm` keys keep a hung model from hanging the gateway:
+
+- `llm.turnTimeoutMs` (default 600000, range 1000–3600000) — wall-clock budget for one
+  whole agent turn, covering every LLM call and tool run. A turn that passes its deadline
+  is aborted cleanly at the next step boundary and the chat gets a readable error reply.
+- `llm.watchdogTimeoutSec` (default 300, range 1–3600) — per-call stall watchdog: a
+  provider call that produces no completion within this window is aborted (real fetches
+  are cancelled via an abort signal; providers that ignore it are cut by the loop's
+  timer race).
+
+Both surface the abort reason to the user ("the model stalled — no response within Ns…"
+or "the turn exceeded its …ms budget…") and persist it as the turn's final assistant
+message. Env overrides: `CARAPACE_TURN_TIMEOUT_MS`, `CARAPACE_WATCHDOG_TIMEOUT_SEC`. The
+effective single-step cap is the minimum of `llm.timeoutMs`, the watchdog, and the
+remaining turn budget.
+
+### Completion routing — agent.announceTarget (#27445)
+
+`agent.announceTarget: { "channel": "telegram", "chatId": "-100123456" }` (or env
+`CARAPACE_ANNOUNCE_TARGET=telegram:-100123456`) routes turn completions: when a message
+arrives from a different chat, the full reply is delivered to the target chat through
+that channel's adapter, and the origin chat receives a one-line routing notice instead.
+Targets that are unknown, disabled, or reply-in-band (the HTTP API channel cannot
+receive pushes) degrade to replying in place, with a single warning logged. Same-chat
+turns are never double-sent. This is the native adaptation of upstream sub-agent
+completion routing: completion notices land where the owner wants them.
+
+### Per-sender routing — senders[] (#81271)
+
+A top-level `senders` table maps a sender or chat id to routing overrides; the first
+matching entry wins:
+
+```json
+{
+  "senders": [
+    { "match": "12345", "allowTools": ["files", "web_fetch"], "model": "gpt-4o-mini" },
+    { "match": "-100999", "channel": "telegram", "model": "llama3" }
+  ]
+}
+```
+
+- `match` — exact sender id or chat id; `channel` (optional) scopes the route to one
+  channel.
+- `allowTools` — per-sender tool allowlist: the tool specs offered to the model for that
+  turn are filtered, so restricted senders never even see the rest.
+- `model` — per-sender model override; the runtime builds (and caches) one provider per
+  model name.
+
+This adapts upstream's per-sender "exec node routing" intent to Carapace's single-node
+architecture: instead of routing to different machines, it routes to different toolsets
+and models on the same node. Validation rejects entries without `allowTools` or `model`
+and duplicate `channel:match` pairs; doctor lists the routes and warns about unknown
+tool names.
+
+### File-defined tools and setup hooks (#80213)
+
+Tool definition files live in `~/.carapace/tools/*.json`:
+
+```json
+{
+  "name": "git_status",
+  "description": "git status of the workspace",
+  "inputSchema": { "type": "object", "properties": {}, "required": [] },
+  "exec": { "argv": ["git", "status", "--short"] },
+  "setup": { "argv": ["bash", "-c", "mkdir -p ~/.carapace/cache"] }
+}
+```
+
+- `exec.argv` is spawned directly (no shell) inside the first allowed root when the
+  model calls the tool; `{{key}}` tokens substitute model-supplied arguments into single
+  argv entries (never shell-interpolated). Exit code 0 → ok; stdout/stderr return as the
+  tool result, capped like the exec tool. Timeout: `tools.exec.timeoutMs`.
+- `setup` is optional: it runs ONCE on first load — inside the allowed roots, output
+  logged as `[tools] setup "<name>" ok/FAILED …` — tracked by a marker file under
+  `<toolsDir>/.setup/<name>-<argv-hash>`, so an edited setup re-runs exactly once. A
+  failed setup is logged and retried on the next boot; it never blocks tool registration
+  or gateway boot.
+- Broken definition files and name collisions with built-ins degrade to warnings.
+- Definition files are operator-authored and executed on the operator's machine — the
+  same trust level as config.json itself. `carapace doctor` validates them read-only
+  (check `tools:custom`) and never runs setups.
+
 ## Endpoints
 
 | Endpoint | Auth | Request / response |
@@ -127,6 +212,8 @@ in `channels.telegram.allowedSenders` are processed (empty list = everyone).
 | llm.apiKey | `{"env": "CARAPACE_LLM_API_KEY"}` | CARAPACE_LLM_API_KEY |
 | llm.model | gpt-4o-mini | CARAPACE_LLM_MODEL |
 | llm.timeoutMs | 120000 (5000–600000) | — |
+| llm.turnTimeoutMs | 600000 (1000–3600000) | CARAPACE_TURN_TIMEOUT_MS |
+| llm.watchdogTimeoutSec | 300 (1–3600) | CARAPACE_WATCHDOG_TIMEOUT_SEC |
 | channels.telegram.enabled | false | CARAPACE_TELEGRAM_ENABLED |
 | channels.telegram.botToken | `{"env": "CARAPACE_TELEGRAM_TOKEN"}` | CARAPACE_TELEGRAM_TOKEN |
 | channels.telegram.allowedSenders | [] | — |
@@ -134,6 +221,8 @@ in `channels.telegram.allowedSenders` are processed (empty list = everyone).
 | channels.api.enabled | true | CARAPACE_API_ENABLED |
 | agent.systemPrompt | Carapace default | — |
 | agent.maxToolIterations | 12 (1–64) | — |
+| agent.announceTarget | null (reply to origin) | CARAPACE_ANNOUNCE_TARGET (`channel:chatId`) |
+| senders | [] (no per-sender routing) | — |
 | tools.allowedRoots | [~/.carapace/workspace] | — |
 | tools.exec.timeoutMs | 30000 (1000–300000) | — |
 | tools.exec.denylist | 7 destructive-command patterns | — |
@@ -168,6 +257,9 @@ config files or logs — status output only ever names the source. This applies 
 6. channel status (telegram enabled/token resolution/media dir, api enabled/auth mode)
 7. llm reachability of secrets (`apiKey` unresolved is a warning, not a failure)
 8. tools: allowedRoots writability, exec timeout, denylist size
+9. tools:custom — file-defined tool definitions validated read-only (setups never run)
+10. routing tables — `agent.announceTarget` (push-incapable targets warn) and `senders[]`
+    (unknown tool names warn)
 
 Disabled-by-config channels are reported, not failed — a default install with only the
 API channel enabled is healthy. Note: `node:sqlite` prints an upstream
@@ -190,9 +282,12 @@ pre-M1 databases keep working.
 - **M2 (done):** gateway hardening — bearer auth on the API channel, Telegram media
   handling, multi-session management (/sessions, /reset, GET /api/v1/sessions), busy
   queue with bounded per-chat waiting, graceful restarts with persisted update offsets.
-- **M3:** community-wishlist features designed in natively (configurable watchdogs,
-  exec-approval denylist extensions, theme system, plugin UI hooks).
-- **M4:** more channels (Discord, WhatsApp, …) and a third-party plugin interface.
+- **M3 (done):** community wishlist as native features — configurable turn budget/stall
+  watchdog (#68596), announceTarget completion routing (#27445), per-sender routing
+  table (#81271), file-defined tools with once-only setup hooks (#80213).
+- **M4:** theme customization system (#28300), Telegram Business Bot support (#20786),
+  plugin-contributed UI pages (#66944), more channels (Discord, WhatsApp, …) and a
+  third-party plugin interface.
 
 ## Conventions
 

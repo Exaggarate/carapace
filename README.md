@@ -4,7 +4,7 @@ An independent, multi-channel AI agent gateway. Carapace runs your own assistant
 own hardware and talks to your own chats — Telegram first, raw HTTP alongside, more
 later. Every line here is written for this project: not a fork, not a rebrand.
 
-## Status: M2 (gateway hardening)
+## Status: M3 (community wishlist as native features)
 
 Working today:
 
@@ -31,9 +31,22 @@ Working today:
   SQLite (contiguous frontier), so a restart resumes exactly where processing stopped —
   redelivery, never loss.
 - **Gateway + doctor** — `carapace gateway` boots the runtime on `gateway.host:gateway.port`;
-  `carapace doctor` verifies node, config, directories, storage engine, channels, llm, tools.
+  `carapace doctor` verifies node, config, directories, storage engine, channels, llm,
+  file-defined tools, and routing tables.
+- **Turn budget + stall watchdog (#68596)** — `llm.turnTimeoutMs` bounds one whole agent
+  turn and `llm.watchdogTimeoutSec` aborts a provider call that never completes; stalled
+  turns abort cleanly with a user-visible error instead of hanging forever.
+- **Completion routing (#27445)** — `agent.announceTarget` delivers full replies for turns
+  arriving from other chats to a chosen `channel:chatId` and leaves the origin chat a
+  one-line notice; unreachable targets degrade to replying in place.
+- **Per-sender routing (#81271)** — a `senders[]` config table maps sender/chat ids to
+  per-sender tool allowlists and model overrides.
+- **File-defined tools + setup hooks (#80213)** — `~/.carapace/tools/*.json` add
+  exec-backed tools; an optional `setup` argv runs once on first load, inside the allowed
+  roots, with its output logged.
 
-Next (M3): community-wishlist features designed in natively.
+Next (M4): theme system (#28300), Telegram Business Bot support (#20786), plugin-
+contributed UI (#66944), more channels.
 
 ## Quickstart
 
@@ -59,6 +72,8 @@ node dist/cli/index.js gateway
 | llm.apiKey | `{"env": "CARAPACE_LLM_API_KEY"}` | CARAPACE_LLM_API_KEY |
 | llm.model | gpt-4o-mini | CARAPACE_LLM_MODEL |
 | llm.timeoutMs | 120000 (5000–600000) | — |
+| llm.turnTimeoutMs | 600000 (1000–3600000) | CARAPACE_TURN_TIMEOUT_MS |
+| llm.watchdogTimeoutSec | 300 (1–3600) | CARAPACE_WATCHDOG_TIMEOUT_SEC |
 | channels.telegram.enabled | false | CARAPACE_TELEGRAM_ENABLED |
 | channels.telegram.botToken | `{"env": "CARAPACE_TELEGRAM_TOKEN"}` | CARAPACE_TELEGRAM_TOKEN |
 | channels.telegram.allowedSenders | [] (everyone) | — |
@@ -66,6 +81,8 @@ node dist/cli/index.js gateway
 | channels.api.enabled | true | CARAPACE_API_ENABLED |
 | agent.systemPrompt | Carapace default | — |
 | agent.maxToolIterations | 12 (1–64) | — |
+| agent.announceTarget | null (reply to origin) | CARAPACE_ANNOUNCE_TARGET (`channel:chatId`) |
+| senders | [] (no per-sender routing) | — |
 | tools.allowedRoots | [~/.carapace/workspace] | — |
 | tools.exec.timeoutMs | 30000 (1000–300000) | — |
 | tools.exec.denylist | 7 destructive-command patterns | — |
@@ -76,6 +93,21 @@ node dist/cli/index.js gateway
 **Secrets:** don't paste tokens inline. Point at them instead — `{"env": "VARNAME"}` reads
 an environment variable, `{"file": "/path"}` reads a file (tilde allowed). Resolution
 happens at runtime; the value never lands in config files or logs.
+
+## Community wishlist → Carapace
+
+Carapace's roadmap is driven by what users actually ask for upstream. M3 turns the
+top-liked OpenClaw requests into native features, designed in rather than patched on:
+
+| Upstream issue | 👍 | Carapace feature |
+|---|---|---|
+| #68596 configurable streaming watchdog | 8 | `llm.turnTimeoutMs` + `llm.watchdogTimeoutSec` — stalled turns abort cleanly with a user-visible error |
+| #27445 announceTarget for completion routing | 5 | `agent.announceTarget` — full replies route to a chosen `channel:chatId`; the origin chat gets a short notice |
+| #80213 tool/skill setup hooks | 4 | `~/.carapace/tools/*.json` declare exec-backed tools with a once-only `setup` argv (marker-tracked, logged) |
+| #81271 per-sender exec node routing | 3 | `senders[]` routing table — per-sender tool allowlists + model overrides (single-node adaptation) |
+
+Deferred to M4 (larger surfaces): theme customization (#28300), Telegram Business Bot
+support (#20786), plugin-contributed UI pages (#66944).
 
 ## API endpoints
 
