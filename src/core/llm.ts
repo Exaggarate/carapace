@@ -50,7 +50,7 @@ export class OpenAiCompatibleProvider implements ChatProvider {
       ...(request.tools.length > 0 ? { tools: request.tools } : {}),
     });
 
-    const raw = (await this.postWithRetry(url, payload)) as WireResponse;
+    const raw = (await this.postWithRetry(url, payload, request.signal)) as WireResponse;
     const choices = Array.isArray(raw.choices) ? (raw.choices as WireChoice[]) : [];
     const choice = choices[0];
     if (choice === undefined || choice.message === undefined) {
@@ -67,7 +67,7 @@ export class OpenAiCompatibleProvider implements ChatProvider {
   }
 
   /** POST JSON; retries once on 429/5xx/network errors, never on 4xx protocol errors. */
-  private async postWithRetry(url: string, payload: string): Promise<unknown> {
+  private async postWithRetry(url: string, payload: string, externalSignal?: AbortSignal): Promise<unknown> {
     let lastError = "unknown error";
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
@@ -78,7 +78,12 @@ export class OpenAiCompatibleProvider implements ChatProvider {
             authorization: `Bearer ${this.options.apiKey}`,
           },
           body: payload,
-          signal: AbortSignal.timeout(this.options.timeoutMs),
+          // Per-request HTTP timeout, combined with the loop's watchdog/turn-budget
+          // signal (#68596) when one is supplied.
+          signal:
+            externalSignal === undefined
+              ? AbortSignal.timeout(this.options.timeoutMs)
+              : AbortSignal.any([AbortSignal.timeout(this.options.timeoutMs), externalSignal]),
         });
         const body = await response.text();
         if (response.ok) {

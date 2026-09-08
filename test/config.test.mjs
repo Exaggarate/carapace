@@ -126,3 +126,22 @@ test("sqlite store round-trips sessions and messages", () => {
   assert.equal(store.getSession("ghost")?.channel, "unknown");
   store.close();
 });
+
+test("validateConfig bounds llm.turnTimeoutMs and llm.watchdogTimeoutSec (#68596)", () => {
+  const good = validateConfig({ llm: { turnTimeoutMs: 250_000, watchdogTimeoutSec: 45 } });
+  assert.equal(good.errors.length, 0);
+  assert.equal(good.config.llm.turnTimeoutMs, 250_000);
+  assert.equal(good.config.llm.watchdogTimeoutSec, 45);
+
+  const defaults = validateConfig({});
+  assert.equal(defaults.config.llm.turnTimeoutMs, 600_000);
+  assert.equal(defaults.config.llm.watchdogTimeoutSec, 300);
+
+  const bad = validateConfig({ llm: { turnTimeoutMs: 10, watchdogTimeoutSec: 0 } });
+  assert.equal(bad.errors.length, 2);
+  assert.ok(bad.errors.some((e) => e.includes("llm.turnTimeoutMs")));
+  assert.ok(bad.errors.some((e) => e.includes("llm.watchdogTimeoutSec")));
+  // fallbacks applied on invalid values
+  assert.equal(bad.config.llm.turnTimeoutMs, 600_000);
+  assert.equal(bad.config.llm.watchdogTimeoutSec, 300);
+});

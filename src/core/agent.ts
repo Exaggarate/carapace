@@ -33,6 +33,12 @@ export interface CompletionRequest {
   messages: ChatMessage[];
   /** OpenAI-compatible tool specs offered to the model for this turn. */
   tools: ToolSpec[];
+  /**
+   * Cancellation signal for the transport (turn budget / stall watchdog, #68596).
+   * Providers that honor it cancel the in-flight request; the loop additionally
+   * races the call against a timer so providers that ignore it are cut anyway.
+   */
+  signal?: AbortSignal;
 }
 
 export type CompletionStopReason = "final_answer" | "tool_use";
@@ -102,6 +108,8 @@ export async function executeToolCall(
   tools: ToolRegistry,
   call: ToolCallRequest,
   context: ToolContext,
+  /** Epoch-ms turn deadline (#68596): the tool cap shrinks to the remaining budget. */
+  deadlineMs?: number,
 ): Promise<ToolResult> {
   const tool = tools.get(call.name);
   if (tool === undefined) {
@@ -126,14 +134,22 @@ export async function executeToolCall(
     return { ok: false, output: `tool "${call.name}" is missing required argument(s): ${missing.join(", ")}` };
   }
 
+  const stepCapMs =
+    deadlineMs === undefined
+      ? TOOL_TIMEOUT_MS
+      : Math.min(TOOL_TIMEOUT_MS, Math.max(0, deadlineMs - Date.now()));
+  if (stepCapMs <= 0) {
+    return { ok: false, output: `turn budget exhausted — tool "${call.name}" was not run (llm.turnTimeoutMs)` };
+  }
+
   let timer: unknown;
   try {
     const result = await Promise.race([
       tool.execute(call.arguments, context),
       new Promise<never>((_, reject) => {
         timer = setTimeout(
-          () => reject(new Error(`tool "${call.name}" timed out after ${TOOL_TIMEOUT_MS}ms`)),
-          TOOL_TIMEOUT_MS,
+          () => reject(new Error(`tool "${call.name}" timed out after ${stepCapMs}ms`)),
+          stepCapMs,
         );
       }),
     ]);
@@ -143,6 +159,58 @@ export async function executeToolCall(
   } finally {
     clearTimeout(timer);
   }
+}
+
+interface TurnLimits {
+  watchdogMs: number;
+  turnDeadline: number | null;
+  watchdogText: string;
+  budgetText: string;
+}
+
+/**
+ * One provider call under the turn watchdog (#68596): the race rejects with a clean
+ * LlmError when the model stalls past llm.watchdogTimeoutSec or the llm.turnTimeoutMs
+ * budget runs out mid-call. The AbortController cancels real transports that honor
+ * CompletionRequest.signal; the timer race also cuts providers that ignore it.
+ */
+async function completeWithWatchdog(
+  provider: ChatProvider,
+  request: CompletionRequest,
+  limits: TurnLimits,
+): Promise<CompletionResult> {
+  const candidates = [limits.watchdogMs > 0 ? limits.watchdogMs : Infinity];
+  if (limits.turnDeadline !== null) candidates.push(Math.max(0, limits.turnDeadline - Date.now()));
+  const stallMs = Math.min(...candidates);
+  if (!Number.isFinite(stallMs)) return provider.complete(request);
+
+  const controller = new AbortController();
+  let timer: unknown;
+  try {
+    return await Promise.race([
+      provider.complete({ ...request, signal: controller.signal }),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          const error = new LlmError(watchdogAbortText(limits));
+          controller.abort(error);
+          reject(error);
+        }, stallMs);
+      }),
+    ]);
+  } catch (error) {
+    // A transport that aborted on the signal surfaces a bare AbortError with no
+    // user-facing context — map any abort back to the readable watchdog text.
+    if (controller.signal.aborted) throw new LlmError(watchdogAbortText(limits));
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function watchdogAbortText(limits: TurnLimits): string {
+  return limits.turnDeadline !== null && Date.now() >= limits.turnDeadline
+    ? limits.budgetText
+    : limits.watchdogText;
 }
 
 /**
@@ -159,6 +227,20 @@ export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime)
   const { sessions, config, provider, tools } = runtime;
   const maxIterations = config.agent.maxToolIterations;
 
+  // Turn budget + stall watchdog (#68596): llm.turnTimeoutMs bounds the whole turn,
+  // llm.watchdogTimeoutSec aborts a single provider call that never completes.
+  // Hand-built configs (tests) may omit llm — absent values disable both limits.
+  const turnTimeoutMs = config.llm?.turnTimeoutMs ?? 0;
+  const watchdogTimeoutSec = config.llm?.watchdogTimeoutSec ?? 0;
+  const turnDeadline = turnTimeoutMs > 0 ? Date.now() + turnTimeoutMs : null;
+  const watchdogText =
+    `the model stalled — no response within ${watchdogTimeoutSec}s, so the turn was aborted ` +
+    "(llm.watchdogTimeoutSec); try again or raise the limit";
+  const budgetText =
+    `the turn exceeded its ${turnTimeoutMs}ms budget and was aborted (llm.turnTimeoutMs); ` +
+    "narrow the request or raise the limit";
+  const limits: TurnLimits = { watchdogMs: watchdogTimeoutSec * 1000, turnDeadline, watchdogText, budgetText };
+
   sessions.getOrCreate(sessionId, input.channel ?? "unknown");
   sessions.appendUser(sessionId, input.text);
 
@@ -170,12 +252,22 @@ export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime)
   for (let iteration = 1; iteration <= maxIterations; iteration++) {
     iterations = iteration;
 
+    // Budget check between steps: once the deadline has passed, stop cleanly.
+    if (turnDeadline !== null && Date.now() >= turnDeadline) {
+      providerError = budgetText;
+      break;
+    }
+
     let completion: CompletionResult;
     try {
-      completion = await provider.complete({
-        messages: sessions.buildContext(sessionId, config.agent.systemPrompt),
-        tools: tools.toSpecs(),
-      });
+      completion = await completeWithWatchdog(
+        provider,
+        {
+          messages: sessions.buildContext(sessionId, config.agent.systemPrompt),
+          tools: tools.toSpecs(),
+        },
+        limits,
+      );
     } catch (error) {
       providerError = error instanceof LlmError ? error.message : `provider failed: ${(error as Error).message}`;
       break;
@@ -185,7 +277,7 @@ export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime)
       sessions.appendAssistant(sessionId, completion.text, completion.toolCalls);
       const context: ToolContext = { sessionId, workdir };
       for (const call of completion.toolCalls) {
-        const result = await executeToolCall(tools, call, context);
+        const result = await executeToolCall(tools, call, context, turnDeadline ?? undefined);
         toolCallsExecuted += 1;
         sessions.appendToolResult(sessionId, call.id, call.name, result.output);
       }

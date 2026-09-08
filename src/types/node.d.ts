@@ -136,8 +136,10 @@ declare function clearTimeout(id: unknown): void;
 
 declare class AbortSignal {
   static timeout(milliseconds: number): AbortSignal;
+  static any(signals: AbortSignal[]): AbortSignal;
   readonly aborted: boolean;
   addEventListener(type: string, listener: () => void, options?: { once?: boolean }): void;
+  readonly reason?: unknown;
 }
 
 declare class AbortController {

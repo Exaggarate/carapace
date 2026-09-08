@@ -64,6 +64,18 @@ export interface LlmConfig {
   model: string;
   /** Per-request HTTP timeout in milliseconds. */
   timeoutMs: number;
+  /**
+   * Wall-clock budget for one whole agent turn — every LLM call and tool run in the
+   * loop (1000–3600000). A turn past its budget aborts cleanly with a user-visible
+   * error instead of hanging forever (#68596).
+   */
+  turnTimeoutMs: number;
+  /**
+   * Stall watchdog in seconds (1–3600): a single provider call that produces no
+   * completion within this window is aborted and the turn fails with a readable
+   * error (#68596).
+   */
+  watchdogTimeoutSec: number;
 }
 
 export interface ToolsConfig {
@@ -173,6 +185,8 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
       apiKey: { env: "CARAPACE_LLM_API_KEY" },
       model: "gpt-4o-mini",
       timeoutMs: 120_000,
+      turnTimeoutMs: 600_000,
+      watchdogTimeoutSec: 300,
     },
     channels: {
       telegram: {
@@ -367,6 +381,24 @@ export function validateConfig(raw: unknown): ValidationResult {
     apiKey: readSecretValue(llmRaw, "apiKey", "llm", errors, defaults.llm.apiKey),
     model: readString(llmRaw, "model", "llm", errors, defaults.llm.model),
     timeoutMs: readBoundedInt(llmRaw, "timeoutMs", "llm", errors, defaults.llm.timeoutMs, 5_000, 600_000),
+    turnTimeoutMs: readBoundedInt(
+      llmRaw,
+      "turnTimeoutMs",
+      "llm",
+      errors,
+      defaults.llm.turnTimeoutMs,
+      1_000,
+      3_600_000,
+    ),
+    watchdogTimeoutSec: readBoundedInt(
+      llmRaw,
+      "watchdogTimeoutSec",
+      "llm",
+      errors,
+      defaults.llm.watchdogTimeoutSec,
+      1,
+      3_600,
+    ),
   };
 
   const toolsRaw = asObjectOrEmpty(root.tools, "tools", errors);
@@ -453,6 +485,28 @@ function applyEnvOverrides(config: CarapaceConfig, warnings: string[]): void {
 
   const llmModel = env("LLM_MODEL");
   if (llmModel !== undefined) config.llm.model = llmModel;
+
+  const turnTimeoutMs = env("TURN_TIMEOUT_MS");
+  if (turnTimeoutMs !== undefined) {
+    const parsed = Number.parseInt(turnTimeoutMs, 10);
+    if (Number.isInteger(parsed) && parsed >= 1_000 && parsed <= 3_600_000) config.llm.turnTimeoutMs = parsed;
+    else {
+      warnings.push(
+        `ignoring ${ENV_PREFIX}TURN_TIMEOUT_MS="${turnTimeoutMs}" — not an integer between 1000 and 3600000`,
+      );
+    }
+  }
+
+  const watchdogTimeoutSec = env("WATCHDOG_TIMEOUT_SEC");
+  if (watchdogTimeoutSec !== undefined) {
+    const parsed = Number.parseInt(watchdogTimeoutSec, 10);
+    if (Number.isInteger(parsed) && parsed >= 1 && parsed <= 3_600) config.llm.watchdogTimeoutSec = parsed;
+    else {
+      warnings.push(
+        `ignoring ${ENV_PREFIX}WATCHDOG_TIMEOUT_SEC="${watchdogTimeoutSec}" — not an integer between 1 and 3600`,
+      );
+    }
+  }
 
   const storagePath = env("STORAGE_PATH");
   if (storagePath !== undefined) config.storage.path = expandTilde(storagePath);
