@@ -245,6 +245,29 @@ Resolution happens at runtime via `resolveSecret()`; the resolved value never la
 config files or logs — status output only ever names the source. This applies to
 `llm.apiKey`, `gateway.apiToken`, and `channels.telegram.botToken` alike.
 
+## Deployment with pm2
+
+The repo ships `ecosystem.config.cjs` and `scripts/start-gateway.sh` for supervised,
+self-healing deployments:
+
+1. **Credentials** — put `KEY=VALUE` lines (`CARAPACE_TELEGRAM_TOKEN=…`,
+   `CARAPACE_LLM_API_KEY=…`, `CARAPACE_API_TOKEN=…`) into `~/.carapace/gateway.env`
+   (mode 600). The launcher sources it at boot; pm2 never sees the values, so its process
+   dump stays secret-free. A missing file is fine — config.json and SecretRefs resolve as
+   usual (`CARAPACE_GATEWAY_ENV` moves the env file if you need another path).
+2. **Start** — `pm2 start ecosystem.config.cjs`. The app runs as `carapace-gateway`
+   (`scripts/start-gateway.sh` → `exec node dist/cli/index.js gateway`), fork mode, single
+   instance.
+3. **Durability knobs** — autorestart on, `max_restarts: 20` within a `min_uptime: 30s`
+   window, `exp_backoff_restart_delay: 1000` (exponential restart backoff),
+   `max_memory_restart: 512M`, and `kill_timeout: 15000` — matching the gateway's 15s
+   shutdown grace so in-flight turns drain on `pm2 restart` instead of being killed mid-turn.
+4. **Verify** — `pm2 status` shows the app online; `curl http://127.0.0.1:8899/health`
+   returns `{"ok":true,…}`; `pm2 restart carapace-gateway` and re-check health.
+5. **Boot resurrection** — run `pm2 save` to snapshot the process list, then `pm2 startup`
+   once per host and follow the printed command; the saved list (and the gateway) comes
+   back after reboot. Logs live under `~/.pm2/logs/` (`pm2 logs carapace-gateway`).
+
 ## Doctor checks
 
 `carapace doctor` reports and exits 0 when healthy:
