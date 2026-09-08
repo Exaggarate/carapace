@@ -16,12 +16,12 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { describeSecretValue, expandTilde, resolveSecret, type CarapaceConfig } from "../../config.js";
+import { markdownToTelegramHtml, splitTelegramText, TELEGRAM_MESSAGE_LIMIT } from "../format.js";
 import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler, type SessionDirectory } from "./types.js";
 
 const API_BASE = "https://api.telegram.org";
 const POLL_TIMEOUT_S = 30;
 const HTTP_TIMEOUT_MS = (POLL_TIMEOUT_S + 10) * 1000;
-const MAX_MESSAGE_CHARS = 3800;
 const SEND_CHUNK_DELAY_MS = 350;
 const MAX_BACKOFF_MS = 30_000;
 /** Bot API getFile/download hard cap for standard bots. */
@@ -416,18 +416,45 @@ export class TelegramChannel implements ChannelAdapter {
   async send(chatId: string, text: string, businessConnectionId: string | null = null): Promise<void> {
     const token = this.token();
     if (token === null) throw new Error("telegram bot token is not resolvable — cannot send");
-    const chunks = splitForTelegram(text === "" ? "(empty reply)" : text);
+    const chunks = splitTelegramText(text === "" ? "(empty reply)" : text);
     for (let index = 0; index < chunks.length; index++) {
-      await this.call(token, "sendMessage", {
-        chat_id: chatId,
-        text: chunks[index],
-        link_preview_options: { is_disabled: true },
-        // Business replies must carry the connection id to go out on the business
-        // account's behalf (#20786); plain sends omit it entirely.
-        ...(businessConnectionId === null ? {} : { business_connection_id: businessConnectionId }),
-      });
+      const chunk = chunks[index] ?? "";
+      await this.sendChunk(token, chatId, chunk, businessConnectionId);
       if (index < chunks.length - 1) await sleep(SEND_CHUNK_DELAY_MS);
     }
+  }
+
+  /**
+   * One chunk out (M11 formatting): markdown is converted to Telegram HTML and
+   * sent with parse_mode=HTML (bold/italic/code/fences/links render, links are
+   * clickable). A chunk whose conversion would exceed the 4096 limit goes out as
+   * plain text, and an entity-parse rejection (400) is retried verbatim without
+   * parse mode — formatting must never lose the message.
+   */
+  private async sendChunk(
+    token: string,
+    chatId: string,
+    chunk: string,
+    businessConnectionId: string | null,
+  ): Promise<void> {
+    const base = {
+      chat_id: chatId,
+      link_preview_options: { is_disabled: true },
+      // Business replies must carry the connection id to go out on the business
+      // account's behalf (#20786); plain sends omit it entirely.
+      ...(businessConnectionId === null ? {} : { business_connection_id: businessConnectionId }),
+    };
+    const html = markdownToTelegramHtml(chunk);
+    if (html.length <= TELEGRAM_MESSAGE_LIMIT) {
+      try {
+        await this.call(token, "sendMessage", { ...base, text: html, parse_mode: "HTML" });
+        return;
+      } catch (error) {
+        if (!(error instanceof TelegramApiError) || error.code !== 400) throw error;
+        this.log(`HTML send rejected (${(error as Error).message}) — retrying as plain text`);
+      }
+    }
+    await this.call(token, "sendMessage", { ...base, text: chunk });
   }
 
   get isRunning(): boolean {
@@ -903,20 +930,4 @@ export class TelegramChannel implements ChannelAdapter {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(() => resolve(), ms));
-}
-
-/** Split long text into Telegram-safe chunks at line/space boundaries. */
-function splitForTelegram(text: string): string[] {
-  if (text.length <= MAX_MESSAGE_CHARS) return [text];
-  const chunks: string[] = [];
-  let rest = text;
-  while (rest.length > MAX_MESSAGE_CHARS) {
-    let cut = rest.lastIndexOf("\n", MAX_MESSAGE_CHARS);
-    if (cut < MAX_MESSAGE_CHARS / 2) cut = rest.lastIndexOf(" ", MAX_MESSAGE_CHARS);
-    if (cut < MAX_MESSAGE_CHARS / 2) cut = MAX_MESSAGE_CHARS;
-    chunks.push(rest.slice(0, cut));
-    rest = rest.slice(cut).replace(/^\n+/, "");
-  }
-  if (rest !== "") chunks.push(rest);
-  return chunks.length > 0 ? chunks : [text];
 }
