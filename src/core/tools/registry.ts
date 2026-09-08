@@ -75,6 +75,18 @@ export class ToolRegistry {
   get size(): number {
     return this.tools.size;
   }
+
+  /** Subset view (#81271): a new registry holding only the named tools. */
+  filter(allow: string[]): ToolRegistry {
+    const wanted = new Set(allow);
+    const view = new ToolRegistry();
+    for (const name of this.names()) {
+      if (!wanted.has(name)) continue;
+      const tool = this.tools.get(name);
+      if (tool !== undefined) view.register(tool);
+    }
+    return view;
+  }
 }
 
 export function createToolRegistry(): ToolRegistry {

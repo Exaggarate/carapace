@@ -58,6 +58,18 @@ export interface AnnounceTargetConfig {
   chatId: string;
 }
 
+/** One per-sender routing entry (#81271): match a sender/chat, override routing. */
+export interface SenderRouteConfig {
+  /** Exact sender id or chat id this route matches. */
+  match: string;
+  /** Restrict the route to one channel (e.g. "telegram" or "api"); absent = any. */
+  channel?: string;
+  /** Tool allowlist for matching senders (registry names); absent = all tools. */
+  allowTools?: string[];
+  /** Model override for matching senders; absent = llm.model. */
+  model?: string;
+}
+
 export interface AgentConfig {
   systemPrompt: string;
   maxToolIterations: number;
@@ -112,6 +124,8 @@ export interface CarapaceConfig {
   channels: ChannelsConfig;
   agent: AgentConfig;
   tools: ToolsConfig;
+  /** Per-sender routing table (#81271): sender/chat → tool allowlist + model override. */
+  senders: SenderRouteConfig[];
   storage: StorageConfig;
 }
 
@@ -216,6 +230,7 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
       maxToolIterations: 12,
       announceTarget: null,
     },
+    senders: [],
     tools: {
       allowedRoots: [join(dir, "workspace")],
       exec: {
@@ -360,7 +375,7 @@ export function validateConfig(raw: unknown): ValidationResult {
     return { config: defaults, errors: ["config root must be a JSON object"] };
   }
   const root = raw as Record<string, unknown>;
-  const knownSections = new Set(["gateway", "llm", "channels", "agent", "tools", "storage"]);
+  const knownSections = new Set(["gateway", "llm", "channels", "agent", "tools", "storage", "senders"]);
   for (const key of Object.keys(root)) {
     if (!knownSections.has(key)) errors.push(`unknown top-level section "${key}"`);
   }
@@ -471,12 +486,76 @@ export function validateConfig(raw: unknown): ValidationResult {
     announceTarget: readAnnounceTarget(agentRaw, errors, defaults.agent.announceTarget),
   };
 
+  // Per-sender routing table (#81271). Invalid entries are dropped with an error —
+  // a broken route must never silently widen or narrow someone's access.
+  const senders: SenderRouteConfig[] = [];
+  if (root.senders !== undefined) {
+    if (!Array.isArray(root.senders)) {
+      errors.push("senders must be an array of routing entries");
+    } else {
+      const seenRoutes = new Set<string>();
+      root.senders.forEach((entry, index) => {
+        const label = `senders[${index}]`;
+        if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
+          errors.push(`${label} must be an object`);
+          return;
+        }
+        const record = entry as Record<string, unknown>;
+        const match = record.match;
+        if (typeof match !== "string" || match.trim() === "") {
+          errors.push(`${label}.match must be a non-empty string`);
+          return;
+        }
+        let channel: string | undefined;
+        if (record.channel !== undefined) {
+          if (typeof record.channel !== "string" || record.channel.trim() === "") {
+            errors.push(`${label}.channel must be a non-empty string`);
+            return;
+          }
+          channel = record.channel;
+        }
+        let allowTools: string[] | undefined;
+        if (record.allowTools !== undefined) {
+          const raw = record.allowTools;
+          if (!Array.isArray(raw) || raw.some((item) => typeof item !== "string" || item.trim() === "")) {
+            errors.push(`${label}.allowTools must be an array of non-empty tool names`);
+            return;
+          }
+          allowTools = raw as string[];
+        }
+        let model: string | undefined;
+        if (record.model !== undefined) {
+          if (typeof record.model !== "string" || record.model.trim() === "") {
+            errors.push(`${label}.model must be a non-empty string`);
+            return;
+          }
+          model = record.model;
+        }
+        if (allowTools === undefined && model === undefined) {
+          errors.push(`${label} must set allowTools, model, or both`);
+          return;
+        }
+        const routeKey = `${channel ?? "*"}:${match}`;
+        if (seenRoutes.has(routeKey)) {
+          errors.push(`${label}: duplicate sender route for ${routeKey}`);
+          return;
+        }
+        seenRoutes.add(routeKey);
+        const route: SenderRouteConfig = { match };
+        if (channel !== undefined) route.channel = channel;
+        if (allowTools !== undefined) route.allowTools = allowTools;
+        if (model !== undefined) route.model = model;
+        senders.push(route);
+      });
+    }
+  }
+
   const storageRaw = asObjectOrEmpty(root.storage, "storage", errors);
   const storage: StorageConfig = {
     path: expandTilde(readString(storageRaw, "path", "storage", errors, defaults.storage.path)),
   };
 
-  return { config: { gateway, llm, channels, agent, tools, storage }, errors };
+  return { config: { gateway, llm, channels, agent, tools, senders, storage }, errors };
 }
 
 function parseEnvBoolean(name: string, raw: string, warnings: string[]): boolean | null {
@@ -609,4 +688,21 @@ export function loadConfig(): LoadedConfig {
   const warnings: string[] = [];
   applyEnvOverrides(config, warnings);
   return { config, configPath: file, createdDefaults, warnings };
+}
+
+/**
+ * First-match per-sender routing (#81271): a route applies when its channel (when
+ * set) equals the message's channel and its match equals the sender id or chat id.
+ * Earlier entries win; duplicates are rejected at validation time.
+ */
+export function resolveSenderRoute(
+  config: CarapaceConfig,
+  message: { channel: string; senderId: string; chatId: string },
+): SenderRouteConfig | null {
+  // Hand-built configs (tests) may omit the senders table entirely.
+  for (const route of config.senders ?? []) {
+    if (route.channel !== undefined && route.channel !== message.channel) continue;
+    if (route.match === message.senderId || route.match === message.chatId) return route;
+  }
+  return null;
 }

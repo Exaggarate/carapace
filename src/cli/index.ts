@@ -19,6 +19,7 @@ import { ApiChannel } from "../gateway/channels/api.js";
 import { TelegramChannel } from "../gateway/channels/telegram.js";
 import { buildRuntime } from "../gateway/runtime.js";
 import { startGatewayServer } from "../gateway/server.js";
+import { createBuiltinTools } from "../core/tools/builtins/index.js";
 import { CarapaceStore } from "../storage/sqlite.js";
 import { VERSION } from "../version.js";
 
@@ -246,6 +247,30 @@ async function commandDoctor(): Promise<number> {
           (pushable
             ? ""
             : " — that channel replies in-band and cannot receive pushes; replies will stay in the origin chat"),
+      });
+    }
+
+    if (config.senders.length > 0) {
+      const toolNames = createBuiltinTools(config).names();
+      const unknown = config.senders.flatMap((route, index) =>
+        (route.allowTools ?? [])
+          .filter((name) => !toolNames.includes(name))
+          .map((name) => `senders[${index}] tool "${name}" not in the registry`),
+      );
+      results.push({
+        name: "routing:senders",
+        status: unknown.length > 0 ? "warn" : "ok",
+        detail:
+          `${config.senders.length} sender route(s): ` +
+          config.senders
+            .map((route) => {
+              const overrides = [
+                route.allowTools !== undefined ? `${route.allowTools.length} tool(s)` : null,
+                route.model !== undefined ? `model=${route.model}` : null,
+              ].filter(Boolean);
+              return `${route.channel ?? "*"}:${route.match} → ${overrides.join(", ") || "no overrides"}`;
+            })
+            .join("; ") + (unknown.length > 0 ? ` — ${unknown.join("; ")}` : ""),
       });
     }
 

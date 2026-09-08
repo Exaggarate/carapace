@@ -1,7 +1,7 @@
 // Gateway runtime assembly: config → provider + tools + session store + channels.
 // Shared by the CLI, tests, and future entry points so there is exactly one wiring.
 
-import { resolveSecret, type CarapaceConfig } from "../config.js";
+import { resolveSecret, resolveSenderRoute, type CarapaceConfig } from "../config.js";
 import { runAgentTurn, type AgentRuntime, type ChatProvider } from "../core/agent.js";
 import { OpenAiCompatibleProvider } from "../core/llm.js";
 import { createBuiltinTools } from "../core/tools/builtins/index.js";
@@ -20,6 +20,8 @@ export interface RuntimeOptions {
   store?: CarapaceStore;
   /** Test seam: options forwarded to the Telegram adapter (e.g. fetchImpl). */
   telegramOptions?: TelegramChannelOptions;
+  /** Test seam: provider factory for per-sender model overrides (#81271). */
+  providerForModel?: (model: string) => ChatProvider;
 }
 
 /** A message waiting for its chat's turn, with the promise it must settle. */
@@ -41,11 +43,11 @@ export interface GatewayRuntime {
   close(): void;
 }
 
-export function createProviderFromConfig(config: CarapaceConfig): ChatProvider {
+export function createProviderFromConfig(config: CarapaceConfig, model?: string): ChatProvider {
   return new OpenAiCompatibleProvider({
     baseURL: config.llm.baseURL,
     apiKey: resolveSecret(config.llm.apiKey) ?? "",
-    model: config.llm.model,
+    model: model ?? config.llm.model,
     timeoutMs: config.llm.timeoutMs,
   });
 }
@@ -67,6 +69,19 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
     provider,
     tools: createBuiltinTools(config),
     sessions: new SessionStore(store),
+  };
+
+  // Per-sender model overrides (#81271): providers are built lazily per model
+  // name and cached for the lifetime of the runtime.
+  const providerForModel =
+    options.providerForModel ?? ((model: string) => createProviderFromConfig(config, model));
+  const modelProviders = new Map<string, ChatProvider>();
+  const providerForModelCached = (model: string): ChatProvider => {
+    const cached = modelProviders.get(model);
+    if (cached !== undefined) return cached;
+    const created = providerForModel(model);
+    modelProviders.set(model, created);
+    return created;
   };
 
   const channels: ChannelAdapter[] = [
@@ -95,8 +110,17 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
   // One session per channel chat; sessions persist across gateway restarts.
   const runTurn = async (message: ChannelMessage): Promise<ChannelReply> => {
     const sessionId = `${message.channel}:${message.chatId}`;
+    // Per-sender routing (#81271): first matching route scopes the toolset and/or model.
+    const route = resolveSenderRoute(config, message);
     const result = await runAgentTurn(
-      { sessionId, text: message.text, channel: message.channel },
+      {
+        sessionId,
+        text: message.text,
+        channel: message.channel,
+        senderId: message.senderId,
+        tools: route?.allowTools !== undefined ? agent.tools.filter(route.allowTools) : undefined,
+        provider: route?.model !== undefined ? providerForModelCached(route.model) : undefined,
+      },
       agent,
     );
     if (announceTarget === null) return { text: result.reply };

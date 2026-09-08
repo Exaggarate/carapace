@@ -161,3 +161,27 @@ test("agent.announceTarget validation (#27445)", () => {
   const badShape = validateConfig({ agent: { announceTarget: "telegram:1" } });
   assert.equal(badShape.errors.length, 1);
 });
+
+test("senders routing table validation (#81271)", () => {
+  const good = validateConfig({ senders: [{ match: "123", allowTools: ["files"], model: "llama" }] });
+  assert.equal(good.errors.length, 0);
+  assert.equal(good.config.senders.length, 1);
+  assert.deepEqual(good.config.senders[0], { match: "123", allowTools: ["files"], model: "llama" });
+
+  const bare = validateConfig({});
+  assert.deepEqual(bare.config.senders, []);
+
+  const bad = validateConfig({
+    senders: [
+      "nope",
+      { match: "" },
+      { match: "x" },
+      { match: "y", allowTools: [42] },
+      { match: "z", model: "" },
+      { match: "dup", model: "a" },
+      { match: "dup", allowTools: ["files"] },
+    ],
+  });
+  // non-object entry, bad match, no overrides, bad allowTools, bad model, duplicate
+  assert.equal(bad.errors.length, 6);
+});

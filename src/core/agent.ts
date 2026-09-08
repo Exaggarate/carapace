@@ -78,6 +78,12 @@ export interface AgentTurnInput {
   text: string;
   /** Origin channel for fresh sessions (defaults to "unknown"). */
   channel?: string;
+  /** Sender id from the channel (per-sender routing, #81271). */
+  senderId?: string;
+  /** Per-turn tool registry override (per-sender allowlist, #81271). */
+  tools?: ToolRegistry;
+  /** Per-turn provider override (per-sender model override, #81271). */
+  provider?: ChatProvider;
 }
 
 export type AgentTurnStopReason = "final_answer" | "max_iterations" | "error";
@@ -224,7 +230,9 @@ function watchdogAbortText(limits: TurnLimits): string {
  */
 export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime): Promise<AgentTurnResult> {
   const sessionId = input.sessionId;
-  const { sessions, config, provider, tools } = runtime;
+  const { sessions, config } = runtime;
+  const provider = input.provider ?? runtime.provider;
+  const tools = input.tools ?? runtime.tools;
   const maxIterations = config.agent.maxToolIterations;
 
   // Turn budget + stall watchdog (#68596): llm.turnTimeoutMs bounds the whole turn,
