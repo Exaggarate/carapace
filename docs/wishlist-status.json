@@ -1,20 +1,27 @@
 {
   "$comment": "Carapace status for the top-liked upstream OpenClaw issues — rendered by the dashboard 'Community wishlist' panel (GET /api/v1/wishlist). state: shipped | building | deferred. Keys are upstream issue numbers; keep entries sorted by 👍.",
   "source": "https://github.com/openclaw/openclaw/issues?sort=reactions",
-  "updated": "2026-09-08",
+  "updated": "2026-09-09",
   "issues": {
     "68596": { "state": "shipped", "version": "0.3.0", "feature": "configurable turn budget + stall watchdog (llm.turnTimeoutMs + llm.watchdogTimeoutSec)" },
+    "6615": { "state": "shipped", "version": "0.2.0", "feature": "exec approvals denylist (tools.exec.denylist)" },
+    "20786": { "state": "shipped", "version": "0.4.0", "feature": "Telegram Business support (business_message / business_connection)" },
     "85030": { "state": "shipped", "version": "0.10.0", "feature": "spawn_subagent tool — sub-turns inherit the parent tool registry (max depth 1, time-boxed)" },
     "8508": { "state": "shipped", "version": "0.10.0", "feature": "configurable ack/done reaction emojis (channels.telegram.ackEmoji / doneEmoji)" },
+    "67413": { "state": "shipped", "version": "0.12.0", "feature": "memory dreaming — a managed 'memory-dreaming' cron job folds daily notes into MEMORY.md (memory.dreaming config; headless by default, optional summary push)" },
     "29387": { "state": "shipped", "version": "0.10.0", "feature": "agents/*/bootstrap/*.md loaded into every system context" },
-    "27445": { "state": "shipped", "version": "0.3.0", "feature": "agent.announceTarget completion routing" },
-    "20786": { "state": "shipped", "version": "0.4.0", "feature": "Telegram Business support (business_message / business_connection)" },
-    "48003": { "state": "shipped", "version": "0.10.0", "feature": "steer mode — mid-turn message injection (channels.telegram.steerMode)" },
     "28300": { "state": "shipped", "version": "0.5.0", "feature": "dashboard themes + custom theme files (ui.theme / ui.themeFile)" },
+    "27445": { "state": "shipped", "version": "0.3.0", "feature": "agent.announceTarget completion routing" },
     "38309": { "state": "shipped", "version": "0.2.0", "feature": "SecretRef resolution in every config surface" },
-    "66944": { "state": "shipped", "version": "0.5.0", "feature": "plugin-UI foundation (plugin panels under /ui)" },
-    "81271": { "state": "shipped", "version": "0.3.0", "feature": "per-sender routing — tool allowlists + model overrides" },
+    "48920": { "state": "shipped", "version": "0.12.0", "feature": "changelog coverage guard — doctor warns when docs/CHANGELOG.md lacks an entry for the running version" },
+    "87744": { "state": "shipped", "version": "0.11.0", "feature": "turn-timeout resilience — stall watchdog + turn budget abort hangs; fallback chain + friendly failure replies keep Telegram turns responsive (no Codex provider; intent covered)" },
+    "80213": { "state": "shipped", "version": "0.12.0", "feature": "setup hooks — file-defined tools run a once-only setup argv (0.11.0); skills declare a setup: frontmatter script run via 'carapace skills setup' with a completion marker, never auto-executed" },
+    "48003": { "state": "shipped", "version": "0.10.0", "feature": "steer mode — mid-turn message injection (channels.telegram.steerMode)" },
     "45608": { "state": "shipped", "version": "0.10.0", "feature": "pre-reset memory flush — sessions are summarized into the daily note before reset" },
-    "6615": { "state": "shipped", "version": "0.2.0", "feature": "exec approvals denylist (tools.exec.denylist)" }
+    "66944": { "state": "shipped", "version": "0.5.0", "feature": "plugin-UI foundation (plugin panels under /ui)" },
+    "108435": { "state": "shipped", "version": "0.12.0", "feature": "hardened boot — bounded channel-start retry, degraded-channel state on GET /health, friendly port-in-use error" },
+    "81271": { "state": "shipped", "version": "0.3.0", "feature": "per-sender routing — tool allowlists + model overrides" },
+    "78096": { "state": "deferred", "feature": "per-agent worker isolation/VFS scratch — Carapace bounds tools via allowedRoots + per-turn tool registries instead; per-session scratch space roadmapped" },
+    "84110": { "state": "deferred", "feature": "no Codex provider in Carapace; prompts assemble append-only per turn, so tool-call continuations reuse a stable prefix" }
   }
 }

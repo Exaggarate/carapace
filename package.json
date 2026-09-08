@@ -1,6 +1,6 @@
 {
   "name": "carapace",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Independent, multi-channel AI agent gateway — your assistant, your hardware, your chats.",
   "type": "module",
   "bin": {

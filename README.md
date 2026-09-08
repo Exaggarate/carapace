@@ -4,7 +4,7 @@ An independent, multi-channel AI agent gateway. Carapace runs your own assistant
 own hardware and talks to your own chats — Telegram, Discord, raw HTTP — more later.
 Every line here is written for this project: not a fork, not a rebrand.
 
-## Status: M11 (conversational UX — start message, command reference, formatting, persona, error UX)
+## Status: M12 (community wishlist round 2 — skill setup hooks, memory dreaming, hardened boot, changelog guard)
 
 Working today:
 
@@ -220,11 +220,19 @@ requests become native features, designed in rather than patched on. The dashboa
 | #29387 agentDir bootstrap files | 5 | `~/.carapace/agents/*/bootstrap/*.md` loaded into every system context, fresh each turn |
 | #27445 announceTarget for completion routing | 5 | `agent.announceTarget` — full replies route to a chosen `channel:chatId`; the origin chat gets a short notice |
 | #28300 theme customization system | 5 | `ui.theme` presets (dark / light / lobster-red / carapace-amber) + a custom `~/.carapace/theme.css` stylesheet inlined by `GET /ui`, doctor-validated |
-| #80213 tool/skill setup hooks | 4 | `~/.carapace/tools/*.json` declare exec-backed tools with a once-only `setup` argv (marker-tracked, logged) |
+| #67413 per-agent dreaming configuration | 5 | `memory.dreaming` — a managed `memory-dreaming` cron job consolidates daily notes into MEMORY.md (headless by default; optional summary push via `chat`) |
+| #80213 tool/skill setup hooks | 4 | file-defined tools: once-only `setup` argv (0.11.0); skills: a `setup:` frontmatter script run via `carapace skills setup <name\|all>` — marker-tracked, never auto-executed |
 | #66944 plugin UI extension system | 4 | `plugins/` convention — `plugin.json` + `panel.html`/`panel.js` served under `/ui/plugins/<name>/`, manifest at `GET /api/v1/plugins`, `system-info` example ships |
 | #48003 steer mode | 4 | `channels.telegram.steerMode = "inject" \| "queue"` (default inject) — mid-turn messages join the running turn's context |
 | #45608 pre-reset memory flush | 4 | before a session reset, one LLM call distills key facts/decisions into the daily memory note |
+| #48920 live docs ahead of release | 4 | changelog coverage guard — `docs/CHANGELOG.md` needs a heading per running version, doctor-checked |
+| #87744 Codex-backed Telegram turn timeouts | 4 | covered by the stall watchdog + turn budget + fallback chain + friendly failure replies (no Codex provider in Carapace) |
 | #81271 per-sender exec node routing | 3 | `senders[]` routing table — per-sender tool allowlists + model overrides (single-node adaptation) |
+| #108435 gateway fails to start after update | 3 | hardened boot — bounded channel-start retry, degraded-channel state on `GET /health`, friendly port-in-use error |
+
+Deferred: #78096 (per-agent worker isolation/VFS scratch — tools are bounded by `tools.allowedRoots`
++ per-turn registries instead) and #84110 (Codex prompt-cache busting — no Codex provider; prompts
+assemble append-only per turn). Live panel data: `docs/wishlist-status.json`.
 
 ### Bootstrap files (#29387)
 
@@ -236,7 +244,8 @@ directories are a no-op, and unreadable files never break turns.
 M8 shipped the automations/scheduler (recurring + timed jobs); M9 shipped the plain-file
 memory system; M10 shipped the wishlist panel + the fixes above; M11 shipped the
 conversational UX layer (start message, command reference, Telegram formatting, persona,
-error UX). Beyond: WhatsApp channels, a third-party plugin interface (tool injection +
+error UX); M12 shipped community round 2 (skill setup hooks, memory dreaming, hardened
+boot, changelog guard). Beyond: WhatsApp channels, a third-party plugin interface (tool injection +
 lifecycle), and richer dashboard write actions.
 
 ## API endpoints

@@ -12,7 +12,7 @@ opposite: the operator (you) owns the machine, the config, the secrets, and the 
 accounts. The gateway's job is to connect those chats to an agent loop with tools —
 reliably, transparently, and without phoning home.
 
-## Architecture at M11
+## Architecture at M12
 
 ```
 src/
@@ -408,6 +408,9 @@ their active business connection.
 | ui.pluginsDir | — (bundled `<package>/plugins` + `~/.carapace/plugins` are always scanned) | — |
 | automations.enabled | true | CARAPACE_AUTOMATIONS_ENABLED |
 | automations.tickMs | 30000 (1000–3600000) | CARAPACE_AUTOMATIONS_TICK_MS |
+| memory.dreaming.enabled | false | — |
+| memory.dreaming.scheduleCron | "0 4 * * *" (5-field crontab, server-local) | — |
+| memory.dreaming.chat | "" (headless; CHANNEL:CHATID for a summary push) | — |
 
 `CARAPACE_HOME` relocates the entire config/state directory (handy for tests). The M0-era
 `channels.telegram.token` key is still accepted as an alias for `botToken`.
@@ -594,6 +597,30 @@ counts.
   their actionable wording; a turn served by a fallback provider carries a short footer
   note; Discord mid-turn failures get the same notice (details stay in the logs).
 
+## Community round 2 (M12)
+
+- **Skill setup hooks (#80213)** — a skill's SKILL.md may declare `setup: <script>` (relative
+  to the skill dir). `carapace skills setup <name|all>` runs it inside the skill directory
+  under a 120s timeout and drops a `.setup-complete` marker on a clean exit; failed or
+  interrupted runs stay "pending" and retry with the same command. Paths escaping the skill
+  directory are refused; the gateway never auto-runs hooks. `skills list` shows
+  `[setup: pending|complete]`; doctor warns on pending hooks (read-only). File-defined tools
+  keep their own once-only `setup` argv from M11.
+- **Memory dreaming (#67413)** — `memory.dreaming` schedules memory consolidation: the
+  gateway keeps a managed `memory-dreaming` cron job in the durable scheduler store (same
+  atomic claim as user automations, so a dream never fires twice). The dream turn reads
+  recent daily notes and folds durable facts into MEMORY.md; daily notes stay untouched as
+  the raw log. With no `memory.dreaming.chat` the run is headless; set it to
+  `CHANNEL:CHATID` for a one-line summary push. Config changes rewrite the job in place
+  (same id → its `automation:<id>` session history survives).
+- **Hardened boot (#108435)** — a failing channel never blocks the gateway: bounded
+  retries (3 attempts, 2s apart) ride out transient network hiccups; a channel that stays
+  down leaves the gateway in a visible degraded state (boot summary + per-channel state on
+  `GET /health`); a busy port fails fast with a friendly message.
+- **Changelog coverage guard (#48920)** — `docs/CHANGELOG.md` must carry a `## v<version>`
+  heading for the running version; the doctor `docs:changelog` check warns otherwise (and
+  on a missing file), so release docs never run ahead of the shipped code.
+
 ## Doctor checks
 
 `carapace doctor` reports and exits 0 when healthy:
@@ -629,6 +656,12 @@ counts.
     the 4096-char limit — an unbalanced fence FAILs
 18. persona — every chat channel resolves to a persona (custom override or the crafted
     default); blocks over 8000 chars WARN (they waste every turn's context)
+19. skills setup hooks — pending hooks WARN with the exact retry command (read-only;
+    doctor never runs them)
+20. memory:dreaming — schedule, summary target, and the managed job's next run
+    (read-only; doctor never fires the dream)
+21. docs:changelog — CHANGELOG.md carries a heading for the running version; a missing
+    entry or file WARNs
 
 Disabled-by-config channels are reported, not failed — a default install with only the
 API channel enabled is healthy. Note: `node:sqlite` prints an upstream
