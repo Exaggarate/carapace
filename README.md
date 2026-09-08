@@ -4,7 +4,7 @@ An independent, multi-channel AI agent gateway. Carapace runs your own assistant
 own hardware and talks to your own chats — Telegram, Discord, raw HTTP — more later.
 Every line here is written for this project: not a fork, not a rebrand.
 
-## Status: M10 (community wishlist panel + native issue fixes)
+## Status: M11 (conversational UX — start message, command reference, formatting, persona, error UX)
 
 Working today:
 
@@ -16,10 +16,26 @@ Working today:
   sizes and errors come back as tool results the model can recover from.
 - **Sessions + SQLite** — every chat gets a persistent session (`<channel>:<chatId>`); full
   history including tool calls round-trips through `node:sqlite` (WAL journal mode).
-- **Telegram channel** — long-poll adapter with `/start`, `/help`, `/id`, `/sessions`,
-  `/reset`, a sender allowlist, and media handling: photos, documents and voice notes are
-  downloaded into `channels.telegram.mediaDir` and passed to the agent as context paths,
-  captions included.
+- **Telegram channel** — long-poll adapter with the full slash-command set (`/start`, `/help`, `/status`,
+  `/sessions`, `/reset`, `/id`, `/skills`, `/automations`), a sender allowlist, and media handling: photos,
+  documents and voice notes are downloaded into `channels.telegram.mediaDir` and passed to the agent as
+  context paths, captions included.
+- **Conversational UX (M11)** — a branded, config-driven `/start` welcome (`channels.telegram.startMessage`;
+  the crafted default lists capabilities, commands, and the Carapace voice), a grouped command reference at
+  `/help`, `/status` with version/uptime/provider+model/fallback count, `/skills` and `/automations` readouts,
+  friendly unknown-command notices, and a shared command layer used by both Telegram and Discord.
+- **Response formatting (M11)** — Telegram replies go out with `parse_mode=HTML`, converted from the agent's
+  markdown with HTML-escaping first: bold/italic/code render, fenced code keeps its blocks, links are
+  clickable. Long replies chunk at the 4096-char Bot API limit on paragraph boundaries — never mid-word, and
+  a fence larger than one chunk is closed and reopened across chunks. A 400 entity-parse rejection retries
+  the chunk verbatim without parse mode, so formatting never loses a message.
+- **Persona layer (M11)** — every channel turn (Telegram, Discord, API, automations) speaks with a crafted
+  Carapace voice (concise, sharp, no fluff, 🦞 energy) joined after the system prompt; override per channel
+  with `channels.<name>.persona`.
+- **Error UX (M11)** — provider failures answer with one friendly line ("🦞 brain hiccup — … fallbacks
+  exhausted … send that again") instead of raw error dumps; watchdog/budget aborts keep their actionable
+  wording; a turn served by a fallback provider carries a short footer note; Discord mid-turn failures get
+  the same treatment.
 - **Telegram Business (#20786)** — when the owner connects the bot via Telegram Business
   settings, `business_message`/`business_connection` updates are handled natively:
   conversations get their own sessions plus a `[business]` context line naming the
@@ -133,6 +149,10 @@ see docs/index.md, section "Deployment with pm2".
 | channels.telegram.steerMode | inject (inject · queue) | — |
 | channels.telegram.ackEmoji | 👀 (empty = off) | — |
 | channels.telegram.doneEmoji | ✅ (empty = off) | — |
+| channels.telegram.startMessage | crafted default (see /start) | — |
+| channels.telegram.persona | crafted default persona | — |
+| channels.discord.persona | crafted default persona | — |
+| channels.api.persona | crafted default persona | — |
 | channels.api.enabled | true | CARAPACE_API_ENABLED |
 | channels.discord.enabled | false | CARAPACE_DISCORD_ENABLED |
 | channels.discord.botToken | `{"env": "CARAPACE_DISCORD_TOKEN"}` | CARAPACE_DISCORD_TOKEN |
@@ -214,9 +234,10 @@ files" section, capped at 20,000 chars. Non-markdown files are ignored, missing
 directories are a no-op, and unreadable files never break turns.
 
 M8 shipped the automations/scheduler (recurring + timed jobs); M9 shipped the plain-file
-memory system; M10 shipped the wishlist panel + the fixes above. Beyond: WhatsApp
-channels, a third-party plugin interface (tool injection + lifecycle), and richer
-dashboard write actions.
+memory system; M10 shipped the wishlist panel + the fixes above; M11 shipped the
+conversational UX layer (start message, command reference, Telegram formatting, persona,
+error UX). Beyond: WhatsApp channels, a third-party plugin interface (tool injection +
+lifecycle), and richer dashboard write actions.
 
 ## API endpoints
 

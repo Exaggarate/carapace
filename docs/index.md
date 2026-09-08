@@ -12,7 +12,7 @@ opposite: the operator (you) owns the machine, the config, the secrets, and the 
 accounts. The gateway's job is to connect those chats to an agent loop with tools —
 reliably, transparently, and without phoning home.
 
-## Architecture at M10
+## Architecture at M11
 
 ```
 src/
@@ -342,16 +342,24 @@ it to localhost in that case; doctor names the mode.
 
 ## Telegram commands
 
+Shared across Telegram and Discord (`gateway/commands.ts`); Telegram keeps its raw-id /id
+format and its business-aware /reset.
+
 | Command | Effect |
 |---|---|
-| /start, /help | welcome text with the command list |
-| /id | this chat's id and your sender id |
+| /start | branded welcome — capabilities one-liners, command list, personality; override with `channels.telegram.startMessage` |
+| /help | grouped full command reference |
+| /status | version, uptime, provider+model (+ fallback count), channel/chat, sessions, steer/business |
 | /sessions | the 10 most recently active sessions with message counts |
-| /reset | delete this chat's session (history cascade) — next message starts fresh |
+| /reset | delete this chat's session (history cascade + memory flush) — next message starts fresh |
+| /id | this chat's id and your sender id |
+| /skills | installed skill playbooks |
+| /automations | scheduled jobs with their next run times |
 
-Unknown slash commands fall through to the agent like any other text. Only senders listed
-in `channels.telegram.allowedSenders` are processed (empty list = everyone); business-
-message customers are instead authorized by their active business connection.
+Unknown slash commands get a friendly notice ("/help lists everything I answer to") instead
+of reaching the agent. Only senders listed in `channels.telegram.allowedSenders` are
+processed (empty list = everyone); business-message customers are instead authorized by
+their active business connection.
 
 ## Configuration
 
@@ -562,6 +570,30 @@ counts.
   on received messages, `doneEmoji` (default ✅) when the turn completed. Empty string
   disables; business chats never receive reactions; failures only log.
 
+## Conversational UX (M11)
+
+- **Start message** — `/start` sends a branded welcome (Carapace 🦞, one-line capabilities,
+  the command list, a personality line). Config-driven: `channels.telegram.startMessage`
+  (absent = the crafted default in `gateway/commands.ts`). Doctor validates that it
+  converts cleanly for the Telegram HTML parse mode.
+- **Command layer** — one shared implementation for Telegram + Discord (`gateway/commands.ts`):
+  `/start /help /status /sessions /reset /id /skills /automations` plus unknown-command
+  notices; `/status` shows version, uptime, provider+model with the fallback count,
+  channel/chat, session count, and steer/business state.
+- **Response formatting** — Telegram sends `parse_mode=HTML` after converting the agent's
+  markdown with HTML-escaping first: bold/italic/code/fenced blocks/links render, links
+  stay clickable. Long replies chunk at the 4096-char Bot API limit on paragraph
+  boundaries — never mid-word; a code fence larger than one chunk is closed and reopened
+  across chunks so every chunk parses. A 400 entity-parse rejection retries the chunk
+  verbatim without parse mode, so formatting never loses a message.
+- **Persona** — every channel turn (Telegram, Discord, API, automations) joins a crafted
+  persona block (concise, sharp, no fluff, 🦞 energy) after the system prompt; per-channel
+  override `channels.<name>.persona` (default in `core/persona.ts`).
+- **Error UX** — provider failures answer with one friendly line ("🦞 brain hiccup — the
+  model backend is unreachable…") instead of raw error dumps; watchdog/budget aborts keep
+  their actionable wording; a turn served by a fallback provider carries a short footer
+  note; Discord mid-turn failures get the same notice (details stay in the logs).
+
 ## Doctor checks
 
 `carapace doctor` reports and exits 0 when healthy:
@@ -592,6 +624,11 @@ counts.
     overdue jobs are noted (they fire on the next tick)
 16. memory — `~/.carapace/workspace/memory` writable (write-probe), daily note count,
     today's note size, MEMORY.md line count
+17. telegram:start-message — the /start welcome (custom or crafted default) converts
+    cleanly for the Telegram HTML parse mode: non-empty, balanced fences, no NULs, within
+    the 4096-char limit — an unbalanced fence FAILs
+18. persona — every chat channel resolves to a persona (custom override or the crafted
+    default); blocks over 8000 chars WARN (they waste every turn's context)
 
 Disabled-by-config channels are reported, not failed — a default install with only the
 API channel enabled is healthy. Note: `node:sqlite` prints an upstream
@@ -645,6 +682,11 @@ pre-M1 databases keep working.
 - **M9 (done):** memory system — plain files under `~/.carapace/workspace/`
   (`memory/YYYY-MM-DD.md` daily notes + `MEMORY.md`), a daily-tail + long-term digest
   injected into every system prompt, `memory_read`/`memory_write` tools, doctor check.
+- **M11 (done):** conversational UX — branded config-driven start message, a shared
+  command layer for Telegram + Discord (grouped /help, /status, /skills, /automations,
+  friendly unknown-command notices), Telegram HTML formatting with 4096
+  paragraph-boundary chunking, persona layer with per-channel overrides, friendly
+  provider-failure/error UX, and doctor checks for the start message + persona.
 - **Next:** WhatsApp (needs a Meta Business API vs unofficial-bridge design
   decision), a third-party plugin interface (tool injection + lifecycle hooks), richer
   dashboard write actions (including automations management).

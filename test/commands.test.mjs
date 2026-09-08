@@ -12,6 +12,7 @@ import {
   DEFAULT_START_MESSAGE,
   handleSlashCommand,
 } from "../dist/gateway/commands.js";
+import { VERSION } from "../dist/version.js";
 
 function tgConfig(telegramOverrides = {}) {
   return {
@@ -92,7 +93,7 @@ function commandCtx(overrides = {}) {
     channel: "telegram",
     chatId: "77",
     senderId: "42",
-    version: "0.10.0",
+    version: VERSION,
     startedAtMs: Date.now() - 90_000,
     config: tgConfig(),
     sessions: sessionsMock(),
@@ -133,7 +134,7 @@ test("/help is a grouped full command reference", async () => {
 
 test("/status shows version, uptime, provider+model, fallback count", async () => {
   const status = await handleSlashCommand("/status", commandCtx());
-  assert.ok(status.text.includes(`v0.10.0`));
+  assert.ok(status.text.includes(`v${VERSION}`));
   assert.ok(status.text.includes("uptime:"), status.text);
   assert.ok(status.text.includes("model: openai/fake-model"));
   assert.ok(status.text.includes("(+2 fallbacks)"));
@@ -233,7 +234,7 @@ test("telegram /status and unknown commands answer in-channel", async () => {
   const { calls, impl } = captureFetch();
   const channel = new TelegramChannel(tgConfig(), { fetchImpl: impl });
   await channel.handleIncoming({ chat: { id: 77 }, from: { id: 42 }, text: "/status" });
-  assert.ok(calls[0].text.includes("v0.10.0"), `sent: ${calls[0].text}`);
+  assert.ok(calls[0].text.includes(`v${VERSION}`), `sent: ${calls[0].text}`);
 
   await channel.handleIncoming({ chat: { id: 77 }, from: { id: 42 }, text: "/nope" });
   assert.ok(calls[1].text.includes("Unknown command"));
