@@ -61,6 +61,14 @@ declare module "node:path" {
   export function basename(path: string, suffix?: string): string;
 }
 
+declare module "node:url" {
+  export function fileURLToPath(url: string | URL): string;
+}
+
+interface ImportMeta {
+  readonly url: string;
+}
+
 declare module "node:os" {
   export function homedir(): string;
   export function tmpdir(): string;

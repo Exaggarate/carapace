@@ -137,6 +137,11 @@ export interface UiConfig {
   theme: (typeof UI_THEMES)[number];
   /** CSS file inlined when theme="custom" (tilde allowed). */
   themeFile: string;
+  /**
+   * Extra plugin directory scanned in addition to the bundled <package>/plugins and
+   * ~/.carapace/plugins roots (tilde allowed). Absent = scan only the defaults (#66944).
+   */
+  pluginsDir?: string;
 }
 
 export interface CarapaceConfig {
@@ -599,6 +604,14 @@ export function validateConfig(raw: unknown): ValidationResult {
     theme: uiTheme,
     themeFile: expandTilde(readString(uiRaw, "themeFile", "ui", errors, defaults.ui.themeFile)),
   };
+  // Optional extra plugin scan root (#66944).
+  if (uiRaw.pluginsDir !== undefined) {
+    if (typeof uiRaw.pluginsDir === "string" && uiRaw.pluginsDir.trim() !== "") {
+      ui.pluginsDir = expandTilde(uiRaw.pluginsDir.trim());
+    } else {
+      errors.push("ui.pluginsDir must be a non-empty string");
+    }
+  }
 
   return { config: { gateway, llm, channels, agent, tools, senders, storage, ui }, errors };
 }

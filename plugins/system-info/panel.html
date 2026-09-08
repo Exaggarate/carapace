@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System Info — carapace plugin</title>
+<style>
+:root{color-scheme:dark;--bg:#0d1117;--panel:#151b23;--panel2:#1b2330;--border:#2a3341;--text:#e6edf3;--muted:#92a3b8;--ok:#3fb950;--err:#f85149}
+*{box-sizing:border-box}
+body{margin:0;padding:16px;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+h1{font-size:16px;margin:0 0 4px}
+.note{color:var(--muted);font-size:12px;margin:0 0 12px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 14px;max-width:640px}
+.kvline{display:grid;grid-template-columns:130px 1fr;gap:4px 12px;align-items:baseline}
+.k{color:var(--muted)}
+.chip{display:inline-block;padding:1px 9px;border-radius:999px;font-size:11px;border:1px solid var(--border);background:var(--panel2);color:var(--muted);margin:6px 4px 0 0}
+.chip.ok{color:var(--ok);border-color:var(--ok)}
+.error{color:var(--err);font-size:12px}
+</style>
+</head>
+<body>
+<h1>&#128026; System Info</h1>
+<p class="note">carapace plugin &middot; refreshes every 10s &middot; data from GET /health and GET /api/v1/status</p>
+<div class="card" id="root">loading&hellip;</div>
+<script src="panel.js"></script>
+</body>
+</html>

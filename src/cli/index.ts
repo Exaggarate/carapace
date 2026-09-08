@@ -18,6 +18,7 @@ import {
 import { ApiChannel } from "../gateway/channels/api.js";
 import { TelegramChannel } from "../gateway/channels/telegram.js";
 import { customThemeFilePath, validateThemeCss } from "../gateway/dashboard.js";
+import { scanPlugins } from "../gateway/plugins.js";
 import { buildRuntime } from "../gateway/runtime.js";
 import { startGatewayServer } from "../gateway/server.js";
 import { createBuiltinToolRegistry } from "../core/tools/builtins/index.js";
@@ -313,6 +314,17 @@ async function commandDoctor(): Promise<number> {
         detail: `theme=${themeName} (built-in preset; ui.theme="custom" loads a stylesheet from ui.themeFile)`,
       });
     }
+
+    // Plugin-UI foundation (#66944): loaded plugins + manifest problems as warnings.
+    const pluginScan = scanPlugins(config);
+    const pluginNames = pluginScan.plugins.map((plugin) => `${plugin.manifest.name} (${plugin.source})`);
+    results.push({
+      name: "ui:plugins",
+      status: pluginScan.issues.length > 0 ? "warn" : "ok",
+      detail:
+        `${pluginScan.plugins.length} plugin(s): ${pluginNames.join(", ") || "none"}` +
+        (pluginScan.issues.length > 0 ? ` — ${pluginScan.issues.join("; ")}` : ""),
+    });
 
     try {
       for (const root of config.tools.allowedRoots) mkdirSync(root, { recursive: true });

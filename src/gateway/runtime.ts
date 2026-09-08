@@ -11,6 +11,7 @@ import { ApiChannel } from "./channels/api.js";
 import { TelegramChannel, type OffsetPersistence, type TelegramChannelOptions } from "./channels/telegram.js";
 import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler } from "./channels/types.js";
 import { mountDashboardRoutes } from "./dashboard.js";
+import { mountPluginRoutes, scanPlugins } from "./plugins.js";
 import { RouteTable } from "./server.js";
 
 export interface RuntimeOptions {
@@ -236,6 +237,11 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
     store,
     channels,
   });
+  // Plugin-UI foundation (#66944): manifest endpoint + one exact-match route set
+  // per loaded plugin; broken manifests surface as warnings, never as crashes.
+  const pluginScan = scanPlugins(config);
+  for (const issue of pluginScan.issues) console.warn(`[plugins] ${issue}`);
+  mountPluginRoutes(routes, config, pluginScan);
   for (const channel of channels) channel.onMessage(handleMessage);
 
   return {

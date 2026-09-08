@@ -1,0 +1,6 @@
+{
+  "name": "system-info",
+  "title": "System Info",
+  "description": "Live gateway + process stats from GET /health and GET /api/v1/status.",
+  "version": "0.1.0"
+}
