@@ -76,6 +76,8 @@ async function readJsonBody(request: IncomingMessage): Promise<BodyRead> {
 
 export class ApiChannel implements ChannelAdapter {
   readonly name = "api";
+  /** The HTTP channel replies in-band; it cannot receive proactive pushes (#27445). */
+  readonly pushCapable = false;
 
   private messageHandler: MessageHandler | null = null;
 

@@ -235,6 +235,20 @@ async function commandDoctor(): Promise<number> {
       });
     }
 
+    if (config.agent.announceTarget !== null) {
+      const target = config.agent.announceTarget;
+      const pushable = target.channel === "telegram";
+      results.push({
+        name: "agent:announceTarget",
+        status: pushable ? "ok" : "warn",
+        detail:
+          `completion notices route to ${target.channel}:${target.chatId}` +
+          (pushable
+            ? ""
+            : " — that channel replies in-band and cannot receive pushes; replies will stay in the origin chat"),
+      });
+    }
+
     const llmKeyResolved = resolveSecret(config.llm.apiKey) !== null;
     results.push({
       name: "llm",

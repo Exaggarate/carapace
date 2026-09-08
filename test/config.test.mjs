@@ -145,3 +145,19 @@ test("validateConfig bounds llm.turnTimeoutMs and llm.watchdogTimeoutSec (#68596
   assert.equal(bad.config.llm.turnTimeoutMs, 600_000);
   assert.equal(bad.config.llm.watchdogTimeoutSec, 300);
 });
+
+test("agent.announceTarget validation (#27445)", () => {
+  const good = validateConfig({ agent: { announceTarget: { channel: "telegram", chatId: "-100123" } } });
+  assert.equal(good.errors.length, 0);
+  assert.deepEqual(good.config.agent.announceTarget, { channel: "telegram", chatId: "-100123" });
+
+  const off = validateConfig({});
+  assert.equal(off.config.agent.announceTarget, null);
+
+  const bad = validateConfig({ agent: { announceTarget: { channel: "", chatId: "x" } } });
+  assert.equal(bad.errors.length, 1);
+  assert.ok(bad.errors[0].includes("agent.announceTarget"));
+
+  const badShape = validateConfig({ agent: { announceTarget: "telegram:1" } });
+  assert.equal(badShape.errors.length, 1);
+});

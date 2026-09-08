@@ -36,6 +36,11 @@ export interface SessionDirectory {
 
 export interface ChannelAdapter {
   readonly name: string;
+  /**
+   * False for reply-in-band channels that cannot receive proactive pushes
+   * (announceTarget routing treats them as undeliverable, #27445).
+   */
+  readonly pushCapable?: boolean;
   /** True when the channel has everything it needs to start (config-wise). */
   isConfigured(): boolean;
   /** One-line status for logs and `carapace doctor`; never includes secret values. */

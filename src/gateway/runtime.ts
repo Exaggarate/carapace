@@ -8,7 +8,7 @@ import { createBuiltinTools } from "../core/tools/builtins/index.js";
 import { SessionStore } from "../core/session.js";
 import { CarapaceStore } from "../storage/sqlite.js";
 import { ApiChannel } from "./channels/api.js";
-import { TelegramChannel, type OffsetPersistence } from "./channels/telegram.js";
+import { TelegramChannel, type OffsetPersistence, type TelegramChannelOptions } from "./channels/telegram.js";
 import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler } from "./channels/types.js";
 import { RouteTable } from "./server.js";
 
@@ -18,6 +18,8 @@ export interface RuntimeOptions {
   provider?: ChatProvider;
   /** Test seam: inject a store (e.g. :memory:) instead of opening config.storage.path. */
   store?: CarapaceStore;
+  /** Test seam: options forwarded to the Telegram adapter (e.g. fetchImpl). */
+  telegramOptions?: TelegramChannelOptions;
 }
 
 /** A message waiting for its chat's turn, with the promise it must settle. */
@@ -67,6 +69,29 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
     sessions: new SessionStore(store),
   };
 
+  const channels: ChannelAdapter[] = [
+    new ApiChannel(config, agent.sessions),
+    new TelegramChannel(config, {
+      sessions: agent.sessions,
+      offsetStore: channelStateAdapter(store),
+      ...options.telegramOptions,
+    }),
+  ];
+
+  // Completion routing (#27445): when agent.announceTarget points at a different
+  // chat, the full reply is delivered there and the origin chat gets a short
+  // routing notice. Unreachable targets (unknown, disabled, or reply-in-band
+  // channels) and failed sends degrade to replying in place — nothing is lost.
+  const announceTarget = config.agent.announceTarget ?? null;
+  let announceWarned = false;
+  const announceFallbackNotice = (reason: string): void => {
+    if (announceWarned) return;
+    announceWarned = true;
+    console.warn(
+      `[runtime] agent.announceTarget ${announceTarget?.channel}:${announceTarget?.chatId} unusable (${reason}) — replies stay in the origin chat`,
+    );
+  };
+
   // One session per channel chat; sessions persist across gateway restarts.
   const runTurn = async (message: ChannelMessage): Promise<ChannelReply> => {
     const sessionId = `${message.channel}:${message.chatId}`;
@@ -74,7 +99,34 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
       { sessionId, text: message.text, channel: message.channel },
       agent,
     );
-    return { text: result.reply };
+    if (announceTarget === null) return { text: result.reply };
+    if (message.channel === announceTarget.channel && message.chatId === announceTarget.chatId) {
+      return { text: result.reply };
+    }
+
+    const adapter = channels.find((candidate) => candidate.name === announceTarget.channel);
+    if (adapter === undefined || !adapter.isConfigured() || adapter.pushCapable === false) {
+      announceFallbackNotice(
+        adapter === undefined
+          ? "unknown channel"
+          : adapter.pushCapable === false
+            ? "reply-in-band channel"
+            : "channel not configured",
+      );
+      return { text: result.reply };
+    }
+    try {
+      await adapter.send(announceTarget.chatId, result.reply);
+      return {
+        text:
+          `↗ completed — the full reply was routed to ${announceTarget.channel}:${announceTarget.chatId} ` +
+          "(agent.announceTarget)",
+      };
+    } catch (error) {
+      return {
+        text: `${result.reply}\n\n(announceTarget delivery failed: ${(error as Error).message} — replying here instead)`,
+      };
+    }
   };
 
   // Busy gate: one in-flight turn per chat; further messages wait in a bounded
@@ -143,10 +195,6 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
     });
   };
 
-  const channels: ChannelAdapter[] = [
-    new ApiChannel(config, agent.sessions),
-    new TelegramChannel(config, { sessions: agent.sessions, offsetStore: channelStateAdapter(store) }),
-  ];
   const routes = new RouteTable();
   for (const channel of channels) channel.mountRoutes?.(routes);
   for (const channel of channels) channel.onMessage(handleMessage);

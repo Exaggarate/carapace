@@ -50,9 +50,23 @@ export interface ChannelsConfig {
   api: ApiChannelConfig;
 }
 
+/** Where turn-completion notices route instead of the origin chat (#27445). */
+export interface AnnounceTargetConfig {
+  /** Channel adapter name (e.g. "telegram"). */
+  channel: string;
+  /** Destination chat id on that channel. */
+  chatId: string;
+}
+
 export interface AgentConfig {
   systemPrompt: string;
   maxToolIterations: number;
+  /**
+   * Completion routing (#27445): when set and the message arrives from a DIFFERENT
+n   * chat, the full reply is delivered to this channel:chatId and the origin chat
+   * receives a short routing notice instead. Null = reply to the origin chat.
+   */
+  announceTarget: AnnounceTargetConfig | null;
 }
 
 /** OpenAI-compatible chat-completions endpoint (OpenAI, Ollama, vLLM, OpenRouter, …). */
@@ -200,6 +214,7 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
     agent: {
       systemPrompt: "You are Carapace, a helpful personal agent running on the owner's own hardware.",
       maxToolIterations: 12,
+      announceTarget: null,
     },
     tools: {
       allowedRoots: [join(dir, "workspace")],
@@ -315,6 +330,26 @@ function readStringArray(
     return fallback;
   }
   return raw as string[];
+}
+
+function readAnnounceTarget(
+  obj: Record<string, unknown>,
+  errors: string[],
+  fallback: AnnounceTargetConfig | null,
+): AnnounceTargetConfig | null {
+  const raw = obj.announceTarget;
+  if (raw === undefined || raw === null) return fallback;
+  if (typeof raw !== "object" || Array.isArray(raw)) {
+    errors.push('agent.announceTarget must be null or an object with "channel" and "chatId" strings');
+    return fallback;
+  }
+  const record = raw as Record<string, unknown>;
+  const { channel, chatId } = record;
+  if (typeof channel !== "string" || channel.trim() === "" || typeof chatId !== "string" || chatId.trim() === "") {
+    errors.push('agent.announceTarget must be null or an object with "channel" and "chatId" strings');
+    return fallback;
+  }
+  return { channel, chatId };
 }
 
 /** Validate an untrusted parsed JSON document against the Carapace schema. */
@@ -433,6 +468,7 @@ export function validateConfig(raw: unknown): ValidationResult {
       1,
       64,
     ),
+    announceTarget: readAnnounceTarget(agentRaw, errors, defaults.agent.announceTarget),
   };
 
   const storageRaw = asObjectOrEmpty(root.storage, "storage", errors);
@@ -504,6 +540,22 @@ function applyEnvOverrides(config: CarapaceConfig, warnings: string[]): void {
     else {
       warnings.push(
         `ignoring ${ENV_PREFIX}WATCHDOG_TIMEOUT_SEC="${watchdogTimeoutSec}" — not an integer between 1 and 3600`,
+      );
+    }
+  }
+
+  // CARAPACE_ANNOUNCE_TARGET="telegram:-100123456" — channel:chatId, first colon splits.
+  const announceTarget = env("ANNOUNCE_TARGET");
+  if (announceTarget !== undefined) {
+    const split = announceTarget.indexOf(":");
+    if (split > 0 && split < announceTarget.length - 1) {
+      config.agent.announceTarget = {
+        channel: announceTarget.slice(0, split),
+        chatId: announceTarget.slice(split + 1),
+      };
+    } else {
+      warnings.push(
+        `ignoring ${ENV_PREFIX}ANNOUNCE_TARGET="${announceTarget}" — expected channel:chatId (e.g. telegram:-100123456)`,
       );
     }
   }
