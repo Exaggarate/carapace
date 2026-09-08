@@ -12,7 +12,7 @@ opposite: the operator (you) owns the machine, the config, the secrets, and the 
 accounts. The gateway's job is to connect those chats to an agent loop with tools —
 reliably, transparently, and without phoning home.
 
-## Architecture at M4
+## Architecture at M5
 
 ```
 src/
@@ -29,12 +29,16 @@ src/
 ├── gateway/
 │   ├── server.ts         node:http server, /health, route table (500-on-throw)
 │   ├── runtime.ts        wiring, per-chat busy gate, waitUntilIdle, offset adapter
+│   ├── dashboard.ts      GET /ui single-page dashboard + theme system (#28300)
+│   ├── plugins.ts        plugin-UI loader: manifest scan + panel routes (#66944)
 │   └── channels/
 │       ├── types.ts      ChannelAdapter contract, BusyTurnError, SessionDirectory
 │       ├── telegram.ts   long-poll adapter: commands, media, business (#20786), offsets, drain
 │       └── api.ts        HTTP channel: POST /api/v1/messages, GET /api/v1/sessions
 ├── storage/sqlite.ts     node:sqlite store (sessions, messages, channel_state; WAL)
 └── types/node.d.ts       hand-rolled ambient types (keeps devDeps to typescript only)
+
+plugins/                 bundled plugin-UI extensions (system-info example, #66944)
 ```
 
 Zero runtime dependencies. TypeScript is the only devDependency. Node >= 22 provides
@@ -195,6 +199,67 @@ Tool definition files live in `~/.carapace/tools/*.json`:
   same trust level as config.json itself. `carapace doctor` validates them read-only
   (check `tools:custom`) and never runs setups.
 
+### Web dashboard + theme system (#28300)
+
+`GET /ui` serves a zero-dependency single-page dashboard (vanilla HTML/JS/CSS, no build
+step) over the gateway's own HTTP surface:
+
+- **Status** — version, uptime, node version, model, storage path with live session/message
+  counts, and one chip per channel; refreshes every 15s.
+- **Sessions** — the 50 most recent sessions; `View` opens the messages view, `Reset`
+  deletes a session (history cascades) after a confirm dialog.
+- **Messages** — the most recent N messages of the selected session (limit 50/100/200),
+  role-chipped, tool rows labeled with their tool name.
+- **Chat** — a console that POSTs to `/api/v1/messages` and renders the reply; a full
+  busy queue surfaces as an inline notice, ctrl+enter sends.
+- **Config** — the full config structure with every secret value replaced by its origin
+  (`from env:NAME`, `from file:PATH`, `set inline — value hidden`). The dashboard never
+  displays, stores, or transmits secret values.
+- **Plugins** — cards for the loaded plugin-UI panels (next section).
+
+**Auth model:** the page shell is static HTML and carries no data, so `GET /ui` stays
+open; every data endpoint (`/api/v1/status`, `/api/v1/config`, `/api/v1/sessions/*`)
+requires the same bearer token as the API channel when `gateway.apiToken` resolves. On
+the first 401 the dashboard prompts for the token and keeps it in the browser's
+localStorage, sending it as an `Authorization` header on later calls.
+
+**Themes:** CSS-variable presets selected by `ui.theme` — `dark` (default), `light`,
+`lobster-red`, `carapace-amber` — plus `custom`, which inlines `ui.themeFile` (default
+`~/.carapace/theme.css`) after the dark variables so a custom file can override
+individual properties. `?theme=<name>` previews any theme without touching config (the
+header shows a preview note; the picker reloads with it). A missing, unreadable, or
+invalid custom file degrades to dark with a note on the page — the gateway never fails
+to render because of a theme file. Doctor check `ui:theme` fails on an invalid custom
+file (empty, markup-looking, or unbalanced braces).
+
+### Plugin-UI foundation (#66944)
+
+A `plugins/` directory convention: each plugin is a directory containing `plugin.json`
+plus optional `panel.html` and `panel.js`, served under `/ui/plugins/<name>/`:
+
+```json
+{
+  "name": "system-info",
+  "title": "System Info",
+  "description": "Live gateway + process stats from GET /health and GET /api/v1/status.",
+  "version": "0.1.0"
+}
+```
+
+- Scan roots, in order: bundled `<packageRoot>/plugins` (the repo ships the `system-info`
+  example), user `~/.carapace/plugins`, and one optional `ui.pluginsDir` (tilde allowed).
+  First declaration of a name wins; duplicates, broken manifests, and URL-unsafe names
+  are reported by doctor (`ui:plugins`) and skipped — never a boot failure.
+- `GET /api/v1/plugins` (bearer) lists the boot manifest — name, title, description,
+  version, source, `hasPanel` — which the dashboard's Plugins tab renders as cards.
+- Panel routes are exact-match and file names are allow-listed (`panel.html`,
+  `panel.js`); names are validated at boot, so path traversal is structurally
+  impossible. Unknown plugins and non-panel files 404.
+- Panels are same-origin pages: the example reads the dashboard's stored bearer token
+  from localStorage and polls `/health` + `/api/v1/status`, refreshing every 10s.
+- Extension point only — no third-party plugin API (tool injection, lifecycle hooks)
+  yet; that lands with the plugin-interface work.
+
 ## Endpoints
 
 | Endpoint | Auth | Request / response |
@@ -203,6 +268,13 @@ Tool definition files live in `~/.carapace/tools/*.json`:
 | GET / | — | index with the route list |
 | POST /api/v1/messages | bearer | body `{"senderId": string, "text": string, "chatId"?: string}` → 200 `{"reply": string, "channel": "api", "chatId": string}` |
 | GET /api/v1/sessions | bearer | 200 `{"sessions": [{id, channel, createdAt, updatedAt, messages}]}` (50 most recent) |
+| GET /api/v1/sessions/messages | bearer | query `sessionId` (required), `limit` (1–500, default 100) → `{session, messages[]}` — most recent messages, oldest → newest |
+| POST /api/v1/sessions/reset | bearer | body `{"sessionId": string}` → 200 `{ok, sessionId}` · 404 unknown session |
+| GET /api/v1/status | bearer | `{version, node, uptimeSec, model, llmBaseURL, storage{path, sessions, messages}, channels[], theme}` |
+| GET /api/v1/config | bearer | full config view with every secret value redacted |
+| GET /api/v1/plugins | bearer | plugin-UI boot manifest `{plugins: [{name, title, description, version, source, hasPanel}]}` |
+| GET /ui | — | the dashboard page; `?theme=<name>` previews a preset or the custom file |
+| GET /ui/plugins/<name>/ | — | plugin panel `panel.html` (the bare path 302-redirects here; `panel.js` served alongside) |
 | GET /api/v1/channels | — | channel status listing |
 
 Status codes on POST: 200 · 400 invalid body · 401 unauthorized · 413 payload too large ·
@@ -255,6 +327,9 @@ message customers are instead authorized by their active business connection.
 | tools.exec.timeoutMs | 30000 (1000–300000) | — |
 | tools.exec.denylist | 7 destructive-command patterns | — |
 | storage.path | ~/.carapace/carapace.db | CARAPACE_STORAGE_PATH |
+| ui.theme | dark (dark · light · lobster-red · carapace-amber · custom) | CARAPACE_UI_THEME |
+| ui.themeFile | ~/.carapace/theme.css | — |
+| ui.pluginsDir | — (bundled `<package>/plugins` + `~/.carapace/plugins` are always scanned) | — |
 
 `CARAPACE_HOME` relocates the entire config/state directory (handy for tests). The M0-era
 `channels.telegram.token` key is still accepted as an alias for `botToken`.
@@ -311,6 +386,9 @@ self-healing deployments:
 9. tools:custom — file-defined tool definitions validated read-only (setups never run)
 10. routing tables — `agent.announceTarget` (push-incapable targets warn) and `senders[]`
     (unknown tool names warn)
+11. ui:theme — dashboard theme preset valid; with `ui.theme: "custom"` the theme file must
+    be readable and CSS-shaped (non-empty, no markup, balanced braces) — invalid files FAIL
+12. ui:plugins — plugin-UI scan: loaded plugins are listed; manifest problems WARN
 
 Disabled-by-config channels are reported, not failed — a default install with only the
 API channel enabled is healthy. Note: `node:sqlite` prints an upstream
@@ -340,9 +418,12 @@ pre-M1 databases keep working.
   handling with persisted connections, separate business sessions, and replies sent on
   behalf of the business account) and gateway durability via pm2 (`ecosystem.config.cjs`
   + `scripts/start-gateway.sh` sourcing `~/.carapace/gateway.env`).
-- **M5:** theme customization system (#28300) and plugin-contributed UI pages (#66944) —
-  both need a web-layer design decision first — plus more channels (Discord, WhatsApp, …)
-  and a third-party plugin interface.
+- **M5 (done):** web dashboard + theme system (#28300 — `GET /ui` with status, sessions,
+  messages, chat, and redacted-config views; presets + custom theme file, doctor-validated)
+  and the plugin-UI foundation (#66944 — `plugins/` convention, manifest endpoint, bundled
+  `system-info` panel).
+- **M6:** more channels (Discord, WhatsApp, …), a third-party plugin interface (tool
+  injection + lifecycle hooks), and richer dashboard write actions.
 
 ## Conventions
 

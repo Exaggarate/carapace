@@ -4,7 +4,7 @@ An independent, multi-channel AI agent gateway. Carapace runs your own assistant
 own hardware and talks to your own chats — Telegram first, raw HTTP alongside, more
 later. Every line here is written for this project: not a fork, not a rebrand.
 
-## Status: M4 (Telegram Business + durable deployment)
+## Status: M5 (web dashboard + themes + plugin UI)
 
 Working today:
 
@@ -39,6 +39,21 @@ Working today:
 - **Gateway + doctor** — `carapace gateway` boots the runtime on `gateway.host:gateway.port`;
   `carapace doctor` verifies node, config, directories, storage engine, channels, llm,
   file-defined tools, and routing tables.
+- **Web dashboard + theme system (#28300)** — `GET /ui` serves a zero-dependency single-page
+  dashboard (vanilla HTML/JS/CSS, no build step): a status panel (version, uptime, channels,
+  storage counts), the session list with reset buttons, recent messages, a chat console that
+  POSTs to `/api/v1/messages`, and a config view with every secret value redacted. Themes are
+  CSS-variable presets — `dark` (default), `light`, `lobster-red`, `carapace-amber` — selected
+  by `ui.theme` and previewable live via `?theme=…`; `ui.theme: "custom"` inlines the
+  `ui.themeFile` stylesheet (default `~/.carapace/theme.css`), validated by doctor. Data
+  endpoints share the API channel's bearer-auth model; the page shell itself carries no data.
+- **Plugin-UI foundation (#66944)** — a `plugins/` directory convention: each plugin directory
+  ships a `plugin.json` manifest and may serve `panel.html` + `panel.js` under
+  `/ui/plugins/<name>/`, listed at `GET /api/v1/plugins` and linked from the dashboard's
+  Plugins tab. Bundled plugins live in `<package>/plugins` (the repo ships a `system-info`
+  example), user plugins in `~/.carapace/plugins`, plus one optional `ui.pluginsDir`. Only
+  allow-listed panel files are served — no arbitrary file access, no path traversal.
+  (Extension point only — no third-party plugin API yet.)
 - **pm2-ready durability** — `ecosystem.config.cjs` + `scripts/start-gateway.sh` run the
   gateway under pm2 with autorestart, exponential restart backoff, a memory ceiling, and a
   kill timeout matching the 15s shutdown grace; credentials load from
@@ -55,9 +70,8 @@ Working today:
   exec-backed tools; an optional `setup` argv runs once on first load, inside the allowed
   roots, with its output logged.
 
-Next (M5): theme system (#28300) and plugin-contributed UI (#66944) — both need a
-web-layer design decision first — plus more channels (Discord, WhatsApp) and a
-third-party plugin interface.
+Next (M6): more channels (Discord, WhatsApp), a third-party plugin interface (tool
+injection + lifecycle), and richer dashboard write actions.
 
 ## Quickstart
 
@@ -102,6 +116,9 @@ see docs/index.md, section "Deployment with pm2".
 | tools.exec.timeoutMs | 30000 (1000–300000) | — |
 | tools.exec.denylist | 7 destructive-command patterns | — |
 | storage.path | ~/.carapace/carapace.db | CARAPACE_STORAGE_PATH |
+| ui.theme | dark (dark · light · lobster-red · carapace-amber · custom) | CARAPACE_UI_THEME |
+| ui.themeFile | ~/.carapace/theme.css | — |
+| ui.pluginsDir | — (bundled `<package>/plugins` + `~/.carapace/plugins` are always scanned) | — |
 
 `CARAPACE_HOME` moves the whole config/state directory (handy for tests).
 
@@ -111,19 +128,21 @@ happens at runtime; the value never lands in config files or logs.
 
 ## Community wishlist → Carapace
 
-Carapace's roadmap is driven by what users actually ask for upstream. M3 and M4 turn the
+Carapace's roadmap is driven by what users actually ask for upstream. M3 through M5 turn the
 top-liked community requests from the upstream project into native features, designed in rather than patched on:
 
 | Upstream issue | 👍 | Carapace feature |
 |---|---|---|
 | #68596 configurable streaming watchdog | 8 | `llm.turnTimeoutMs` + `llm.watchdogTimeoutSec` — stalled turns abort cleanly with a user-visible error |
 | #27445 announceTarget for completion routing | 5 | `agent.announceTarget` — full replies route to a chosen `channel:chatId`; the origin chat gets a short notice |
-| #80213 tool/skill setup hooks | 4 | `~/.carapace/tools/*.json` declare exec-backed tools with a once-only `setup` argv (marker-tracked, logged) |
 | #20786 Telegram Business Bot support | 7 | `business_message`/`business_connection` handled natively — persisted connections, separate business sessions, replies on behalf of the business account |
+| #80213 tool/skill setup hooks | 4 | `~/.carapace/tools/*.json` declare exec-backed tools with a once-only `setup` argv (marker-tracked, logged) |
+| #28300 theme customization system | 5 | `ui.theme` presets (dark / light / lobster-red / carapace-amber) + a custom `~/.carapace/theme.css` stylesheet inlined by `GET /ui`, doctor-validated |
+| #66944 plugin UI extension system | 4 | `plugins/` convention — `plugin.json` + `panel.html`/`panel.js` served under `/ui/plugins/<name>/`, manifest at `GET /api/v1/plugins`, `system-info` example ships |
 | #81271 per-sender exec node routing | 3 | `senders[]` routing table — per-sender tool allowlists + model overrides (single-node adaptation) |
 
-Deferred to M5 (larger surfaces): theme customization (#28300) and plugin-contributed UI
-pages (#66944) — both need a web-layer design decision first.
+M6 candidates: Discord and WhatsApp channels, a third-party plugin interface (tool
+injection + lifecycle), and richer dashboard write actions.
 
 ## API endpoints
 
@@ -131,8 +150,15 @@ pages (#66944) — both need a web-layer design decision first.
 |---|---|---|
 | GET /health | — | liveness, version, uptime |
 | GET / | — | index + route listing |
+| GET /ui | — | single-page dashboard (`?theme=` previews a preset or the custom file) |
 | POST /api/v1/messages | bearer | run one agent turn for a chat |
 | GET /api/v1/sessions | bearer | list the 50 most recent sessions with message counts |
+| GET /api/v1/sessions/messages?sessionId=&limit= | bearer | most recent messages of one session (oldest → newest, limit 1–500) |
+| POST /api/v1/sessions/reset | bearer | body `{"sessionId": string}` — delete a session (history cascade) |
+| GET /api/v1/status | bearer | version, uptime, model, storage counts, channel states |
+| GET /api/v1/config | bearer | full config with every secret value redacted |
+| GET /api/v1/plugins | bearer | loaded plugin-UI manifests |
+| GET /ui/plugins/<name>/ | — | plugin panel page (`panel.js` served alongside; extension point #66944) |
 | GET /api/v1/channels | — | channel status |
 
 Bearer auth: `Authorization: Bearer <gateway.apiToken>` (constant-time compare). With no
