@@ -8,6 +8,7 @@
 // firing (advanceAutomation) and resume from the next future slot.
 
 import { runAgentTurn, type AgentRuntime } from "../core/agent.js";
+import { personaForChannel } from "../core/persona.js";
 import { advanceEveryMs, nextRunMs, parseSchedule, type ParsedSchedule } from "../core/schedule.js";
 import type { AutomationRow, CarapaceStore } from "../storage/sqlite.js";
 import type { ChannelAdapter } from "./channels/types.js";
@@ -213,7 +214,14 @@ export class Scheduler {
     let error: string | null = null;
     try {
       const result = await runAgentTurn(
-        { sessionId: `automation:${job.id}`, text: job.prompt, channel: job.channel, senderId: "scheduler" },
+        {
+          sessionId: `automation:${job.id}`,
+          text: job.prompt,
+          channel: job.channel,
+          senderId: "scheduler",
+          // Automations deliver into chat channels too — same persona voice (M11).
+          persona: personaForChannel(this.options.agent.config, job.channel),
+        },
         this.options.agent,
       );
       reply = result.reply;

@@ -95,6 +95,8 @@ export interface AgentTurnInput {
   depth?: number;
   /** Per-turn turn-budget override (ms) — spawn_subagent time-boxes its sub-turn. */
   turnTimeoutMs?: number;
+  /** Persona block (M11) joined after the base system prompt, resolved per channel. */
+  persona?: string;
 }
 
 export type AgentTurnStopReason = "final_answer" | "max_iterations" | "error";
@@ -252,6 +254,9 @@ export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime)
   const skillsBlock = runtime.skills?.systemContextBlock() ?? null;
   const memoryBlock = runtime.memory?.contextBlock() ?? null;
   let systemPrompt = config.agent.systemPrompt;
+  // Persona layer (M11): the channel's personality block joins right after the
+  // base prompt; skills/memory/bootstrap stay appended in order after it.
+  if (input.persona !== undefined && input.persona.trim() !== "") systemPrompt += `\n\n${input.persona}`;
   if (skillsBlock !== null) systemPrompt += `\n\n${skillsBlock}`;
   if (memoryBlock !== null) systemPrompt += `\n\n${memoryBlock}`;
   // Bootstrap files (#29387): ~/.carapace/agents/*/bootstrap/*.md join every turn's

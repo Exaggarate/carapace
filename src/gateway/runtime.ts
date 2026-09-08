@@ -12,6 +12,7 @@ import {
   type SecretValue,
 } from "../config.js";
 import { runAgentTurn, type AgentRuntime, type ChatProvider } from "../core/agent.js";
+import { personaForChannel } from "../core/persona.js";
 import { flushSessionToMemory } from "../core/flush.js";
 import { MemoryStore } from "../core/memory.js";
 import { AnthropicProvider } from "../core/llm/providers/anthropic.js";
@@ -338,6 +339,8 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
         senderId: message.senderId,
         tools: route?.allowTools !== undefined ? agent.tools.filter(route.allowTools) : undefined,
         provider: route?.model !== undefined ? providerForModelCached(route.model) : undefined,
+        // Persona layer (M11): every channel turn speaks with the configured voice.
+        persona: personaForChannel(config, message.channel),
       },
       agent,
     );

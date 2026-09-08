@@ -62,16 +62,25 @@ export interface TelegramChannelConfig {
    * gateway/commands.ts. Multi-line markdown; bold via ** pairs.
    */
   startMessage?: string;
+  /**
+   * Per-channel persona override (M11); absent = the crafted default in
+   * core/persona.ts. Joined after the agent system prompt.
+   */
+  persona?: string;
 }
 
 export interface ApiChannelConfig {
   enabled: boolean;
+  /** Per-channel persona override (M11); absent = the crafted default. */
+  persona?: string;
 }
 
 export interface DiscordChannelConfig {
   enabled: boolean;
   /** Bot token from the Discord developer portal. Accepts a SecretRef; resolved at runtime, never logged. */
   botToken: SecretValue;
+  /** Per-channel persona override (M11); absent = the crafted default. */
+  persona?: string;
 }
 
 export interface ChannelsConfig {
@@ -598,6 +607,9 @@ export function validateConfig(raw: unknown): ValidationResult {
     readSecretValue(telegramRaw, "token", "channels.telegram", errors, defaults.channels.telegram.botToken),
   );
   const startMessage = readOptionalString(telegramRaw, "startMessage", "channels.telegram", errors);
+  const telegramPersona = readOptionalString(telegramRaw, "persona", "channels.telegram", errors);
+  const apiPersona = readOptionalString(apiRaw, "persona", "channels.api", errors);
+  const discordPersona = readOptionalString(discordRaw, "persona", "channels.discord", errors);
   const channels: ChannelsConfig = {
     telegram: {
       enabled: readBoolean(telegramRaw, "enabled", "channels.telegram", errors, defaults.channels.telegram.enabled),
@@ -632,8 +644,12 @@ export function validateConfig(raw: unknown): ValidationResult {
         defaults.channels.telegram.doneEmoji ?? "✅",
       ),
       ...(startMessage === undefined ? {} : { startMessage }),
+      ...(telegramPersona === undefined ? {} : { persona: telegramPersona }),
     },
-    api: { enabled: readBoolean(apiRaw, "enabled", "channels.api", errors, defaults.channels.api.enabled) },
+    api: {
+      enabled: readBoolean(apiRaw, "enabled", "channels.api", errors, defaults.channels.api.enabled),
+      ...(apiPersona === undefined ? {} : { persona: apiPersona }),
+    },
     discord: {
       enabled: readBoolean(discordRaw, "enabled", "channels.discord", errors, defaults.channels.discord.enabled),
       botToken: readSecretValue(
@@ -643,6 +659,7 @@ export function validateConfig(raw: unknown): ValidationResult {
         errors,
         defaults.channels.discord.botToken,
       ),
+      ...(discordPersona === undefined ? {} : { persona: discordPersona }),
     },
   };
 
