@@ -4,7 +4,7 @@ An independent, multi-channel AI agent gateway. Carapace runs your own assistant
 own hardware and talks to your own chats — Telegram, Discord, raw HTTP — more later.
 Every line here is written for this project: not a fork, not a rebrand.
 
-## Status: M6 (Discord channel adapter)
+## Status: M7 (skills + multi-provider models)
 
 Working today:
 
@@ -33,6 +33,21 @@ Working today:
   ignored) runs the same agent loop; replies post via REST `POST /channels/{id}/messages`
   through a serialized queue with `x-ratelimit-remaining`/`retry_after` handling and
   2000-char chunking. `carapace doctor` probes the token against `GET /users/@me`.
+- **Skills system (M7)** — operator-authored playbooks in `~/.carapace/skills/<name>/SKILL.md`
+  (name/description frontmatter, markdown body, optional `scripts/`+`assets/`): loaded at
+  gateway boot, re-loaded on directory changes without a restart, and injected into the
+  agent's system context as an "available skills" index — the agent reads the full SKILL.md
+  with its file tools when a task matches. `carapace skills list` / `carapace skills path
+  <name>`, a doctor check, and two example playbooks ship in `skills/examples/`.
+- **Multi-provider models (M7)** — `llm.provider` selects `openai` (the original
+  chat/completions path), `anthropic` (native `/v1/messages`: `x-api-key` +
+  `anthropic-version` headers, `tool_use` blocks mapped to Carapace tool calls), or
+  `ollama` (local OpenAI-compatible server, default `http://127.0.0.1:11434/v1`). The
+  top-level `llm.baseURL`/`apiKey`/`model` fields keep working unchanged.
+- **Fallback chain (M7)** — `llm.fallbacks[]` lists fully-specified backup providers tried
+  in order when the primary fails (rate limit, timeout, 5xx, network error); the first
+  provider to answer serves the turn and every turn logs which one did. `carapace models`
+  prints the serving chain; `carapace doctor` checks config + reachability per provider.
 - **HTTP channel** — `POST /api/v1/messages` runs the same agent loop; `GET /api/v1/sessions`
   lists sessions; both require bearer auth when `gateway.apiToken` resolves (constant-time
   compare, 401 on missing/wrong token).
@@ -44,8 +59,8 @@ Working today:
   SQLite (contiguous frontier), so a restart resumes exactly where processing stopped —
   redelivery, never loss.
 - **Gateway + doctor** — `carapace gateway` boots the runtime on `gateway.host:gateway.port`;
-  `carapace doctor` verifies node, config, directories, storage engine, channels, llm,
-  file-defined tools, and routing tables.
+  `carapace doctor` verifies node, config, directories, storage engine, channels, llm
+  (per provider, plus reachability probes), skills, file-defined tools, and routing tables.
 - **Web dashboard + theme system (#28300)** — `GET /ui` serves a zero-dependency single-page
   dashboard (vanilla HTML/JS/CSS, no build step): a status panel (version, uptime, channels,
   storage counts), the session list with reset buttons, recent messages, a chat console that
@@ -180,8 +195,9 @@ top-liked community requests from the upstream project into native features, des
 | #66944 plugin UI extension system | 4 | `plugins/` convention — `plugin.json` + `panel.html`/`panel.js` served under `/ui/plugins/<name>/`, manifest at `GET /api/v1/plugins`, `system-info` example ships |
 | #81271 per-sender exec node routing | 3 | `senders[]` routing table — per-sender tool allowlists + model overrides (single-node adaptation) |
 
-M6 candidates: Discord and WhatsApp channels, a third-party plugin interface (tool
-injection + lifecycle), and richer dashboard write actions.
+M8 candidates: automations/scheduler (recurring + timed jobs); M9: a memory system.
+Beyond: WhatsApp channels, a third-party plugin interface (tool injection + lifecycle),
+and richer dashboard write actions.
 
 ## API endpoints
 

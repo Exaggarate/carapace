@@ -12,15 +12,17 @@ opposite: the operator (you) owns the machine, the config, the secrets, and the 
 accounts. The gateway's job is to connect those chats to an agent loop with tools —
 reliably, transparently, and without phoning home.
 
-## Architecture at M6
+## Architecture at M7
 
 ```
 src/
-├── cli/index.ts          carapace gateway | doctor | models | version | help
+├── cli/index.ts          carapace gateway | doctor | models | skills | version | help
 ├── config.ts             ~/.carapace/config.json loader, CARAPACE_* overrides, SecretRef
 ├── core/
 │   ├── agent.ts          agent loop: LLM → tool exec → iterate (defensive tool handling)
-│   ├── llm.ts            OpenAI-compatible chat-completions provider (fetch-based)
+│   ├── llm.ts            provider re-exports (implementations live under llm/providers/)
+│   ├── llm/providers/    openai · anthropic (/v1/messages) · ollama · fallback chain (M7)
+│   ├── skills.ts         skill playbooks: SKILL.md scan, change-watch, context index (M7)
 │   ├── session.ts        SessionStore: identity, history, context assembly, deletion
 │   └── tools/
 │       ├── registry.ts   tool registry + OpenAI function specs
@@ -345,6 +347,15 @@ message customers are instead authorized by their active business connection.
 | llm.timeoutMs | 120000 (5000–600000) | — |
 | llm.turnTimeoutMs | 600000 (1000–3600000) | CARAPACE_TURN_TIMEOUT_MS |
 | llm.watchdogTimeoutSec | 300 (1–3600) | CARAPACE_WATCHDOG_TIMEOUT_SEC |
+| llm.provider | openai (openai · anthropic · ollama) | — |
+| llm.anthropic.apiKey | `{"env": "CARAPACE_ANTHROPIC_API_KEY"}` | CARAPACE_ANTHROPIC_API_KEY |
+| llm.anthropic.model | claude-sonnet-4-5 | — |
+| llm.anthropic.baseURL | https://api.anthropic.com | — |
+| llm.anthropic.maxTokens | 8192 (256–200000) | — |
+| llm.ollama.baseURL | http://127.0.0.1:11434/v1 | — |
+| llm.ollama.model | llama3.1 | — |
+| llm.ollama.apiKey | ollama (sent as bearer; ignored by Ollama) | — |
+| llm.fallbacks | [] (no backup providers) | — |
 | channels.telegram.enabled | false | CARAPACE_TELEGRAM_ENABLED |
 | channels.telegram.botToken | `{"env": "CARAPACE_TELEGRAM_TOKEN"}` | CARAPACE_TELEGRAM_TOKEN |
 | channels.telegram.allowedSenders | [] | — |
@@ -406,6 +417,59 @@ self-healing deployments:
    once per host and follow the printed command; the saved list (and the gateway) comes
    back after reboot. Logs live under `~/.pm2/logs/` (`pm2 logs carapace-gateway`).
 
+## Skills (M7)
+
+Skills are operator-authored playbooks that shape agent behavior:
+
+- Convention: `~/.carapace/skills/<name>/SKILL.md` — a `---` frontmatter block with
+  non-empty `name:` and `description:`, then markdown instructions. Optional `scripts/`
+  and `assets/` subdirectories live next to the file.
+- The gateway loads every skill at boot and re-loads on directory changes (debounced
+  `fs.watch` — edits apply without a restart).
+- Only the index is injected into the agent's system context: name, one-line description,
+  and the SKILL.md path. The agent reads the full file with its file tools when a task
+  matches.
+- CLI: `carapace skills list` (loaded skills, sources, issues) and `carapace skills path
+  <name>` (print the SKILL.md path). `carapace doctor` reports the count; parse problems
+  WARN, never fail.
+- Two example playbooks ship in the repo under `skills/examples/` (`web-research`,
+  `sysadmin`) — copy one into `~/.carapace/skills/` to install it.
+
+## Providers and fallbacks (M7)
+
+`llm.provider` selects how turns reach a model:
+
+| provider | wire protocol | configured via |
+|---|---|---|
+| `openai` (default) | `POST {baseURL}/chat/completions` | top-level `llm.baseURL` / `llm.apiKey` / `llm.model` — kept unchanged for backward compatibility |
+| `anthropic` | `POST {baseURL}/v1/messages` with `x-api-key` + `anthropic-version` headers | `llm.anthropic.{apiKey, model, baseURL, maxTokens}` |
+| `ollama` | OpenAI-compatible local server | `llm.ollama.{baseURL, model, apiKey}` — defaults to `http://127.0.0.1:11434/v1` |
+
+The Anthropic provider maps Carapace tool specs to Anthropic's `input_schema` shape and
+`tool_use` content blocks back into Carapace tool calls; system prompts ride the `system`
+field and tool results return as `tool_result` blocks.
+
+**Fallback chain** — `llm.fallbacks[]` is an ordered list of fully-specified backup
+providers. When the primary fails — rate limit, timeout, 5xx, or network error — the next
+entry is tried; the first provider to answer serves the turn, and the gateway logs which
+one did (`[llm] turn served by provider "…"`). `carapace models` prints the whole chain.
+
+```json
+{
+  "llm": {
+    "provider": "openai",
+    "baseURL": "https://api.openai.com/v1",
+    "apiKey": { "env": "CARAPACE_LLM_API_KEY" },
+    "model": "gpt-4o-mini",
+    "fallbacks": [
+      { "provider": "ollama", "model": "llama3.1" },
+      { "provider": "anthropic", "model": "claude-sonnet-4-5",
+        "apiKey": { "env": "CARAPACE_ANTHROPIC_API_KEY" } }
+    ]
+  }
+}
+```
+
 ## Doctor checks
 
 `carapace doctor` reports and exits 0 when healthy:
@@ -417,15 +481,19 @@ self-healing deployments:
 5. storage engine probe: sessions + messages round-trip on a throwaway db in tmp
 6. channel status (telegram enabled/token resolution/media dir, api enabled/auth mode,
    discord enabled/token resolution + gateway reachability probe)
-7. llm reachability of secrets (`apiKey` unresolved is a warning, not a failure)
+7. llm — one config entry per serving-chain provider (primary first, then
+   `llm.fallbacks[]`); unresolved credentials WARN. Providers with a resolvable credential
+   (or auth-free Ollama) get a bounded reachability probe — a rejected credential
+   (401/403) FAILs, an unreachable endpoint WARNs
 8. tools: allowedRoots writability, exec timeout, denylist size
 9. tools:custom — file-defined tool definitions validated read-only (setups never run)
-10. routing tables — `agent.announceTarget` (push-incapable targets warn) and `senders[]`
+10. skills — SKILL.md scan of `~/.carapace/skills`: loaded count; parse problems WARN
+11. routing tables — `agent.announceTarget` (push-incapable targets warn) and `senders[]`
     (unknown tool names warn)
-11. ui:theme — dashboard theme preset valid; with `ui.theme: "custom"` the theme file must
+12. ui:theme — dashboard theme preset valid; with `ui.theme: "custom"` the theme file must
     be readable and CSS-shaped (non-empty, no markup, balanced braces) — invalid files FAIL
-12. ui:plugins — plugin-UI scan: loaded plugins are listed; manifest problems WARN
-13. channel:discord — enabled/token resolution (disabled channels are reported, not
+13. ui:plugins — plugin-UI scan: loaded plugins are listed; manifest problems WARN
+14. channel:discord — enabled/token resolution (disabled channels are reported, not
     failed); with a resolvable token, `channel:discord-gateway` probes REST
     `GET /users/@me` — a rejected token (401) FAILs, an unreachable gateway WARNs
 
@@ -464,9 +532,17 @@ pre-M1 databases keep working.
 - **M6 (done):** Discord channel adapter — gateway WebSocket (identify, heartbeat,
   resume, reconnect flows; zero runtime dependencies) + REST message sender with minimal
   rate-limit handling, `channels.discord { enabled, botToken }` config, doctor probes.
-  Next: WhatsApp (needs a Meta Business API vs unofficial-bridge design decision), a
-  third-party plugin interface (tool injection + lifecycle hooks), richer dashboard write
-  actions.
+- **M7 (done):** skills system — `~/.carapace/skills/<name>/SKILL.md` playbooks loaded at
+  boot and re-loaded on change, an "available skills" index injected into the system
+  context, `carapace skills list|path`, a doctor check, and two example playbooks — plus
+  the multi-provider LLM layer: `llm.provider` = `openai` | `anthropic` (native
+  `/v1/messages` with tool_use mapping) | `ollama` (local OpenAI-compatible), the
+  `llm.fallbacks[]` serving chain with per-turn provider logging, and per-provider doctor
+  checks.
+- **M8/M9 (planned):** automations/scheduler (recurring + timed jobs), then a memory
+  system. After that: WhatsApp (needs a Meta Business API vs unofficial-bridge design
+  decision), a third-party plugin interface (tool injection + lifecycle hooks), richer
+  dashboard write actions.
 
 ## Conventions
 
