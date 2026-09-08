@@ -5,7 +5,8 @@
 // resolved at runtime, never logged.
 // M2: inbound photos, documents and voice notes are downloaded into
 // channels.telegram.mediaDir and handed to the agent as context paths; captions
-// ride along as the message text.
+// ride along as the message text. getUpdates offsets are persisted through an
+// OffsetPersistence store so a restart resumes exactly where processing stopped.
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
@@ -22,6 +23,10 @@ const MAX_BACKOFF_MS = 30_000;
 const BOT_FILE_LIMIT_BYTES = 20 * 1024 * 1024;
 const DOWNLOAD_TIMEOUT_MS = 60_000;
 const DEFAULT_MEDIA_DIR = "~/.carapace/workspace/media";
+/** channel_state key holding the last contiguously processed update id. */
+const OFFSET_KEY = "telegram:update_offset";
+/** How long stop() waits for in-flight updates before giving up (best effort). */
+const PENDING_DRAIN_MS = 10_000;
 
 const WELCOME_TEXT =
   "🐢 Carapace is online.\n\n" +
@@ -210,6 +215,14 @@ export interface TelegramChannelOptions {
   fetchImpl?: (input: string, init?: RequestInit) => Promise<Response>;
   /** Session directory for /sessions and /reset (absent in doctor mode). */
   sessions?: SessionDirectory;
+  /** Offset persistence for restart-safe update processing (wired by the runtime). */
+  offsetStore?: OffsetPersistence;
+}
+
+/** Minimal persistence for the last contiguously processed update id. */
+export interface OffsetPersistence {
+  get(key: string): string | null;
+  set(key: string, value: string): void;
 }
 
 export class TelegramChannel implements ChannelAdapter {
@@ -222,6 +235,14 @@ export class TelegramChannel implements ChannelAdapter {
   private readonly log: (line: string) => void;
   private readonly fetchImpl: (input: string, init?: RequestInit) => Promise<Response>;
   private readonly sessions: SessionDirectory | null;
+  private readonly offsetStore: OffsetPersistence | null;
+  /** Last contiguously processed update id (-1 before anything is processed). */
+  private processedThrough = -1;
+  /** True once the frontier has been seeded for this process lifetime. */
+  private frontierSeeded = false;
+  private readonly completedIds = new Set<number>();
+  private readonly inFlightIds = new Set<number>();
+  private readonly pendingUpdates = new Set<Promise<void>>();
 
   constructor(
     private readonly config: CarapaceConfig,
@@ -230,6 +251,7 @@ export class TelegramChannel implements ChannelAdapter {
     this.log = options.log ?? ((line: string) => console.log(`[telegram] ${line}`));
     this.fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
     this.sessions = options.sessions ?? null;
+    this.offsetStore = options.offsetStore ?? null;
   }
 
   /** Where inbound media is saved (lazy default so hand-built configs still work). */
@@ -269,6 +291,7 @@ export class TelegramChannel implements ChannelAdapter {
     }
     const me = (await this.call(token, "getMe", {})) as { username?: unknown };
     this.botUsername = typeof me.username === "string" ? me.username : null;
+    this.restoreOffset();
     this.running = true;
     this.pollAbort = new AbortController();
     void this.pollLoop(token);
@@ -279,6 +302,11 @@ export class TelegramChannel implements ChannelAdapter {
     this.running = false;
     this.pollAbort?.abort();
     this.pollAbort = null;
+    // Give in-flight updates a bounded chance to finish; the offset frontier only
+    // advances past them once they truly completed, so a crash just redelivers.
+    const pending = [...this.pendingUpdates];
+    if (pending.length === 0) return;
+    await Promise.race([Promise.allSettled(pending), sleep(PENDING_DRAIN_MS)]);
   }
 
   async send(chatId: string, text: string): Promise<void> {
@@ -336,9 +364,11 @@ export class TelegramChannel implements ChannelAdapter {
 
   /** Long-poll loop: sequential getUpdates, exponential backoff, fatal on auth errors. */
   private async pollLoop(token: string): Promise<void> {
-    let offset = 0;
     let backoffMs = 1_000;
     while (this.running) {
+      // Confirm only the contiguous frontier — a crash redelivers everything still
+      // in flight instead of losing it.
+      const offset = this.processedThrough + 1;
       const controller = new AbortController();
       const external = this.pollAbort;
       if (external !== null) {
@@ -359,8 +389,7 @@ export class TelegramChannel implements ChannelAdapter {
         backoffMs = 1_000;
         const list = Array.isArray(updates) ? (updates as TelegramUpdate[]) : [];
         for (const update of list) {
-          offset = update.update_id + 1;
-          this.enqueueUpdate(update);
+          this.trackUpdate(update);
         }
       } catch (error) {
         if (!this.running) break;
@@ -387,15 +416,67 @@ export class TelegramChannel implements ChannelAdapter {
   }
 
   /** Serialize handling per chat so replies never overtake each other. */
-  private enqueueUpdate(update: TelegramUpdate): void {
+  /** Hand an update to processing exactly once; redeliveries only re-confirm. */
+  private trackUpdate(update: TelegramUpdate): void {
+    const id = update.update_id;
+    if (id <= this.processedThrough || this.completedIds.has(id) || this.inFlightIds.has(id)) {
+      this.markProcessed(id);
+      return;
+    }
+    this.inFlightIds.add(id);
+    this.ensureFrontierSeeded(id);
+    const task = this.processUpdate(update)
+      .catch((error: unknown) => this.log(`update handling failed: ${(error as Error).message}`))
+      .finally(() => {
+        this.inFlightIds.delete(id);
+        this.pendingUpdates.delete(task);
+      });
+    this.pendingUpdates.add(task);
+  }
+
+  /** Process one update end-to-end, then confirm it for restart-safety. Public for tests. */
+  async processUpdate(update: TelegramUpdate): Promise<void> {
     const message = update.message;
-    if (message === undefined) return;
-    if (message.chat === undefined) return;
+    this.ensureFrontierSeeded(update.update_id);
+    if (message === undefined || message.chat === undefined) {
+      this.markProcessed(update.update_id);
+      return;
+    }
     // Per-chat ordering is the runtime busy gate's job; media downloads and
     // command replies may interleave safely.
-    void this.handleIncoming(message).catch((error: unknown) =>
+    await this.handleIncoming(message).catch((error: unknown) =>
       this.log(`update handling failed: ${(error as Error).message}`),
     );
+    this.markProcessed(update.update_id);
+  }
+
+  /** Restore the last contiguously processed update id from the offset store. */
+  private restoreOffset(): void {
+    const stored = this.offsetStore?.get(OFFSET_KEY) ?? null;
+    this.processedThrough = stored !== null && /^\d+$/.test(stored) ? Number.parseInt(stored, 10) : -1;
+  }
+
+  /**
+   * Seed the contiguous frontier from the first fresh delivery of a process
+   * lifetime (Telegram batches are ascending, so that id is the batch minimum):
+   * everything before it was confirmed by a previous process or already expired.
+   */
+  private ensureFrontierSeeded(updateId: number): void {
+    if (this.frontierSeeded) return;
+    this.frontierSeeded = true;
+    if (this.processedThrough < 0) this.processedThrough = updateId - 1;
+  }
+
+  /** Record completion; persist the contiguous frontier (never a gappy one). */
+  private markProcessed(updateId: number): void {
+    this.completedIds.add(updateId);
+    while (this.completedIds.has(this.processedThrough + 1)) {
+      this.processedThrough += 1;
+      this.completedIds.delete(this.processedThrough);
+    }
+    if (this.processedThrough >= 0 && this.offsetStore !== null) {
+      this.offsetStore.set(OFFSET_KEY, String(this.processedThrough));
+    }
   }
 
   /** Process one inbound Telegram message end-to-end. Public for tests and reuse. */

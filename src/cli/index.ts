@@ -91,6 +91,8 @@ async function commandGateway(): Promise<number> {
   console.log("   ready — press ctrl+c to stop");
 
   let shuttingDown = false;
+  /** Bounded patience for in-flight agent turns before the process exits anyway. */
+  const SHUTDOWN_GRACE_MS = 15_000;
   const shutdown = (signal: string): void => {
     if (shuttingDown) return;
     shuttingDown = true;
@@ -103,8 +105,13 @@ async function commandGateway(): Promise<number> {
           // keep shutting down regardless
         }
       }
+      // Give in-flight turns a bounded chance to finish; anything queued behind
+      // them is redelivered on the next start (offsets only confirm processed work).
+      const drained = await runtime.waitUntilIdle(SHUTDOWN_GRACE_MS);
+      if (!drained) console.warn("shutdown grace elapsed with turns still active — closing anyway");
       await handle.stop();
       runtime.close();
+      console.log("shutdown complete");
       process.exit(0);
     })();
   };

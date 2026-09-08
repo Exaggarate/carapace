@@ -8,7 +8,7 @@ import { createBuiltinTools } from "../core/tools/builtins/index.js";
 import { SessionStore } from "../core/session.js";
 import { CarapaceStore } from "../storage/sqlite.js";
 import { ApiChannel } from "./channels/api.js";
-import { TelegramChannel } from "./channels/telegram.js";
+import { TelegramChannel, type OffsetPersistence } from "./channels/telegram.js";
 import { BusyTurnError, type ChannelAdapter, type ChannelMessage, type ChannelReply, type MessageHandler } from "./channels/types.js";
 import { RouteTable } from "./server.js";
 
@@ -46,6 +46,14 @@ export function createProviderFromConfig(config: CarapaceConfig): ChatProvider {
     model: config.llm.model,
     timeoutMs: config.llm.timeoutMs,
   });
+}
+
+/** Adapt a CarapaceStore to the channel offset-persistence contract. */
+export function channelStateAdapter(store: CarapaceStore): OffsetPersistence {
+  return {
+    get: (key) => store.getChannelState(key),
+    set: (key, value) => store.setChannelState(key, value),
+  };
 }
 
 export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
@@ -137,7 +145,7 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
 
   const channels: ChannelAdapter[] = [
     new ApiChannel(config, agent.sessions),
-    new TelegramChannel(config, { sessions: agent.sessions }),
+    new TelegramChannel(config, { sessions: agent.sessions, offsetStore: channelStateAdapter(store) }),
   ];
   const routes = new RouteTable();
   for (const channel of channels) channel.mountRoutes?.(routes);

@@ -58,6 +58,11 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at   INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_messages_session_time ON messages (session_id, created_at);
+CREATE TABLE IF NOT EXISTS channel_state (
+  key        TEXT PRIMARY KEY,
+  value      TEXT NOT NULL,
+  updated_at INTEGER NOT NULL
+);
 `;
 
 // Columns added after the M0 schema; applied in-place so pre-M1 databases keep working.
@@ -136,11 +141,15 @@ export class CarapaceStore {
   private readonly selectSessions: StatementSync;
   private readonly deleteSessionStmt: StatementSync;
   private readonly countMessagesStmt: StatementSync;
+  private readonly getChannelStateStmt: StatementSync;
+  private readonly setChannelStateStmt: StatementSync;
 
   constructor(dbPath: string) {
     if (dbPath !== ":memory:") mkdirSync(dirname(dbPath), { recursive: true });
     this.db = new DatabaseSync(dbPath);
     this.db.exec("PRAGMA foreign_keys = ON;");
+    // WAL: committed state survives crashes and restarts without losing tail writes.
+    this.db.exec("PRAGMA journal_mode = WAL;");
     this.db.exec(SCHEMA_SQL);
     for (const statement of MIGRATION_SQL) {
       try {
@@ -174,6 +183,11 @@ export class CarapaceStore {
     );
     this.deleteSessionStmt = this.db.prepare("DELETE FROM sessions WHERE id = ?");
     this.countMessagesStmt = this.db.prepare("SELECT COUNT(*) AS n FROM messages WHERE session_id = ?");
+    this.getChannelStateStmt = this.db.prepare("SELECT value FROM channel_state WHERE key = ?");
+    this.setChannelStateStmt = this.db.prepare(
+      "INSERT INTO channel_state (key, value, updated_at) VALUES (?, ?, ?) " +
+        "ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
+    );
   }
 
   createSession(id: string, channel: string, metadata: Record<string, unknown> = {}): void {
@@ -250,6 +264,17 @@ export class CarapaceStore {
     const row = this.countMessagesStmt.get(sessionId) as { n?: number | bigint } | undefined;
     const n = row?.n;
     return typeof n === "bigint" ? Number(n) : typeof n === "number" ? n : 0;
+  }
+
+  /** Channel bookkeeping value (e.g. Telegram update offsets); null when unset. */
+  getChannelState(key: string): string | null {
+    const row = this.getChannelStateStmt.get(key) as { value?: unknown } | undefined;
+    return typeof row?.value === "string" ? row.value : null;
+  }
+
+  /** Persist a channel bookkeeping value (upsert). */
+  setChannelState(key: string, value: string): void {
+    this.setChannelStateStmt.run(key, value, Date.now());
   }
 
   close(): void {
