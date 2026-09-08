@@ -3,8 +3,13 @@
 // gateway's message handler (the agent loop), and replies with sendMessage.
 // The bot token comes from config (channels.telegram.botToken) or a SecretRef —
 // resolved at runtime, never logged.
+// M2: inbound photos, documents and voice notes are downloaded into
+// channels.telegram.mediaDir and handed to the agent as context paths; captions
+// ride along as the message text.
 
-import { describeSecretValue, resolveSecret, type CarapaceConfig } from "../../config.js";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { basename, join } from "node:path";
+import { describeSecretValue, expandTilde, resolveSecret, type CarapaceConfig } from "../../config.js";
 import type { ChannelAdapter, ChannelMessage, ChannelReply, MessageHandler } from "./types.js";
 
 const API_BASE = "https://api.telegram.org";
@@ -13,10 +18,14 @@ const HTTP_TIMEOUT_MS = (POLL_TIMEOUT_S + 10) * 1000;
 const MAX_MESSAGE_CHARS = 3800;
 const SEND_CHUNK_DELAY_MS = 350;
 const MAX_BACKOFF_MS = 30_000;
+/** Bot API getFile/download hard cap for standard bots. */
+const BOT_FILE_LIMIT_BYTES = 20 * 1024 * 1024;
+const DOWNLOAD_TIMEOUT_MS = 60_000;
+const DEFAULT_MEDIA_DIR = "~/.carapace/workspace/media";
 
 const WELCOME_TEXT =
   "🐢 Carapace is online.\n\n" +
-  "Send me any message and I'll answer through the agent loop (tools included).\n" +
+  "Send me any message — text, photos, documents or voice — and I'll answer through the agent loop (tools included).\n" +
   "Commands:\n/id — show this chat's and your sender id\n/help — this text";
 
 export class TelegramApiError extends Error {
@@ -45,12 +54,150 @@ interface TelegramMessage {
   from?: TelegramUser;
   chat?: TelegramChat;
   text?: string;
+  caption?: string;
   date?: number;
+  photo?: TelegramPhotoSize[];
+  document?: TelegramDocument;
+  voice?: TelegramVoice;
+}
+
+interface TelegramPhotoSize {
+  file_id?: string;
+  file_unique_id?: string;
+  file_size?: number;
+  width?: number;
+  height?: number;
+}
+
+interface TelegramDocument {
+  file_id?: string;
+  file_unique_id?: string;
+  file_name?: string;
+  file_size?: number;
+  mime_type?: string;
+}
+
+interface TelegramVoice {
+  file_id?: string;
+  file_unique_id?: string;
+  file_size?: number;
+  mime_type?: string;
+  duration?: number;
 }
 
 interface TelegramUpdate {
   update_id: number;
   message?: TelegramMessage;
+}
+
+/** One downloadable inbound attachment, parsed from a Telegram message. */
+export interface TelegramMediaItem {
+  kind: "photo" | "document" | "voice";
+  fileId: string;
+  /** Stable unique id from Telegram — used in saved file names. */
+  fileUniqueId: string;
+  /** Original file name (documents only). */
+  fileName: string | null;
+  mimeType: string | null;
+  /** Bytes as reported by Telegram, when present. */
+  size: number | null;
+  /** Audio length in seconds (voice only). */
+  durationSeconds: number | null;
+}
+
+function idOr(value: string | undefined, fallback: string): string {
+  return typeof value === "string" && value !== "" ? value : fallback;
+}
+
+function sizeOr(value: number | undefined): number | null {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+}
+
+/** Parse inbound media attachments; photo arrays collapse to the largest size. */
+export function mediaItemsFromMessage(message: TelegramMessage): TelegramMediaItem[] {
+  const items: TelegramMediaItem[] = [];
+  const photo = message.photo;
+  if (Array.isArray(photo) && photo.length > 0) {
+    let largest: TelegramPhotoSize = photo[0] ?? {};
+    for (const candidate of photo) {
+      if ((candidate.file_size ?? 0) > (largest.file_size ?? 0)) largest = candidate;
+    }
+    const fileId = idOr(largest.file_id, "");
+    if (fileId !== "") {
+      items.push({
+        kind: "photo",
+        fileId,
+        fileUniqueId: idOr(largest.file_unique_id, fileId),
+        fileName: null,
+        mimeType: "image/jpeg",
+        size: sizeOr(largest.file_size),
+        durationSeconds: null,
+      });
+    }
+  }
+  const document = message.document;
+  if (document !== undefined) {
+    const fileId = idOr(document.file_id, "");
+    if (fileId !== "") {
+      items.push({
+        kind: "document",
+        fileId,
+        fileUniqueId: idOr(document.file_unique_id, fileId),
+        fileName:
+          typeof document.file_name === "string" && document.file_name.trim() !== ""
+            ? document.file_name
+            : null,
+        mimeType: typeof document.mime_type === "string" ? document.mime_type : null,
+        size: sizeOr(document.file_size),
+        durationSeconds: null,
+      });
+    }
+  }
+  const voice = message.voice;
+  if (voice !== undefined) {
+    const fileId = idOr(voice.file_id, "");
+    if (fileId !== "") {
+      items.push({
+        kind: "voice",
+        fileId,
+        fileUniqueId: idOr(voice.file_unique_id, fileId),
+        fileName: null,
+        mimeType: typeof voice.mime_type === "string" ? voice.mime_type : "audio/ogg",
+        size: sizeOr(voice.file_size),
+        durationSeconds: typeof voice.duration === "number" && voice.duration >= 0 ? voice.duration : null,
+      });
+    }
+  }
+  return items;
+}
+
+/** Strip path separators and control characters from an untrusted file name. */
+export function sanitizeMediaFileName(name: string, fallback = "file"): string {
+  const base = name.split(/[\\/]/).pop() ?? "";
+  const cleaned = base.replace(/[\u0000-\u001f<>:"|?*]/g, "").trim();
+  const safe = cleaned === "" ? fallback : cleaned;
+  return safe.length > 64 ? safe.slice(0, 64) : safe;
+}
+
+function humanBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/** Saved file name: kind + unique id prefix keeps names unique and sorted. */
+function mediaFileName(item: TelegramMediaItem, telegramPath: string): string {
+  if (item.kind === "photo") return `photo_${item.fileUniqueId}.jpg`;
+  if (item.kind === "voice") return `voice_${item.fileUniqueId}.ogg`;
+  const original =
+    item.fileName ?? sanitizeMediaFileName(basename(telegramPath), "file.bin");
+  return `doc_${item.fileUniqueId}_${sanitizeMediaFileName(original, "file.bin")}`;
+}
+
+export interface TelegramChannelOptions {
+  log?: (line: string) => void;
+  /** Test seam: replaces fetch for Bot API calls and file downloads. */
+  fetchImpl?: (input: string, init?: RequestInit) => Promise<Response>;
 }
 
 export class TelegramChannel implements ChannelAdapter {
@@ -62,12 +209,19 @@ export class TelegramChannel implements ChannelAdapter {
   private botUsername: string | null = null;
   private readonly chatQueues = new Map<string, Promise<void>>();
   private readonly log: (line: string) => void;
+  private readonly fetchImpl: (input: string, init?: RequestInit) => Promise<Response>;
 
   constructor(
     private readonly config: CarapaceConfig,
-    log?: (line: string) => void,
+    options: TelegramChannelOptions = {},
   ) {
-    this.log = log ?? ((line: string) => console.log(`[telegram] ${line}`));
+    this.log = options.log ?? ((line: string) => console.log(`[telegram] ${line}`));
+    this.fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
+  }
+
+  /** Where inbound media is saved (lazy default so hand-built configs still work). */
+  private mediaDir(): string {
+    return expandTilde(this.config.channels.telegram.mediaDir ?? DEFAULT_MEDIA_DIR);
   }
 
   private token(): string | null {
@@ -83,7 +237,7 @@ export class TelegramChannel implements ChannelAdapter {
     const bot = this.botUsername === null ? "" : `, bot=@${this.botUsername}`;
     return `enabled=${enabled}, botToken=${describeSecretValue(botToken)}, resolved=${
       this.isConfigured() ? "yes" : "no"
-    }, mode=long-poll${bot}`;
+    }, mode=long-poll, media=${this.mediaDir()}${bot}`;
   }
 
   onMessage(handler: MessageHandler): void {
@@ -139,7 +293,7 @@ export class TelegramChannel implements ChannelAdapter {
     payload: Record<string, unknown>,
     signal?: AbortSignal,
   ): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/bot${token}/${method}`, {
+    const response = await this.fetchImpl(`${API_BASE}/bot${token}/${method}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload),
@@ -227,7 +381,7 @@ export class TelegramChannel implements ChannelAdapter {
     if (chatId === "") return;
     const previous = this.chatQueues.get(chatId) ?? Promise.resolve();
     const next = previous
-      .then(() => this.handleMessage(message, chatId))
+      .then(() => this.handleIncoming(message))
       .catch((error: unknown) => this.log(`update handling failed: ${(error as Error).message}`));
     this.chatQueues.set(chatId, next);
     void next.finally(() => {
@@ -235,7 +389,10 @@ export class TelegramChannel implements ChannelAdapter {
     });
   }
 
-  private async handleMessage(message: TelegramMessage, chatId: string): Promise<void> {
+  /** Process one inbound Telegram message end-to-end. Public for tests and reuse. */
+  async handleIncoming(message: TelegramMessage): Promise<void> {
+    const chatId = message.chat === undefined ? "" : String(message.chat.id);
+    if (chatId === "") return;
     const sender = message.from;
     const senderId = sender === undefined ? "unknown" : String(sender.id);
     const username = sender?.username;
@@ -245,10 +402,10 @@ export class TelegramChannel implements ChannelAdapter {
       return;
     }
 
-    const text = typeof message.text === "string" ? message.text : "";
+    const rawText = typeof message.text === "string" ? message.text : "";
 
-    if (text.startsWith("/")) {
-      const command = text.split(/[\s@]/)[0] ?? text;
+    if (rawText.startsWith("/")) {
+      const command = rawText.split(/[\s@]/)[0] ?? rawText;
       if (command === "/start" || command === "/help") {
         await this.send(chatId, WELCOME_TEXT);
         return;
@@ -260,8 +417,11 @@ export class TelegramChannel implements ChannelAdapter {
       // Unknown slash commands fall through to the agent like any other text.
     }
 
+    const mediaText = rawText === "" ? await this.collectMedia(message) : null;
+    const text = mediaText ?? rawText;
+
     if (text.trim() === "") {
-      await this.send(chatId, "I can only process text messages for now.").catch(() => undefined);
+      await this.send(chatId, "I can only process text, photos, documents and voice messages for now.").catch(() => undefined);
       return;
     }
     if (this.handler === null) {
@@ -277,6 +437,73 @@ export class TelegramChannel implements ChannelAdapter {
     if (reply !== undefined && reply.text !== "") {
       await this.send(chatId, reply.text);
     }
+  }
+
+  /** Download inbound attachments into mediaDir; returns the context text for the agent. */
+  private async collectMedia(message: TelegramMessage): Promise<string | null> {
+    const items = mediaItemsFromMessage(message);
+    if (items.length === 0) return null;
+    const token = this.token();
+    const lines: string[] = [];
+    if (token === null) {
+      lines.push("[media] bot token unresolved — attachments not saved");
+    } else {
+      for (const item of items) {
+        try {
+          const saved = await this.downloadMedia(token, item);
+          const bits: string[] = [];
+          if (item.kind === "document" && item.fileName !== null) bits.push(item.fileName);
+          if (item.mimeType !== null) bits.push(item.mimeType);
+          bits.push(humanBytes(saved.bytes));
+          if (item.durationSeconds !== null) bits.push(`${item.durationSeconds}s`);
+          lines.push(`[media] ${item.kind} → ${saved.path} (${bits.join(", ")})`);
+        } catch (error) {
+          lines.push(`[media] ${item.kind} unavailable (${(error as Error).message})`);
+        }
+      }
+    }
+    const caption = typeof message.caption === "string" ? message.caption : "";
+    return caption.trim() === "" ? lines.join("\n") : `${lines.join("\n")}\n\n${caption}`;
+  }
+
+  /** getFile + file download into mediaDir. Throws on any failure; the caller degrades. */
+  private async downloadMedia(token: string, item: TelegramMediaItem): Promise<{ path: string; bytes: number }> {
+    if (item.size !== null && item.size > BOT_FILE_LIMIT_BYTES) {
+      throw new Error(`file too large (${humanBytes(item.size)}; Bot API limit is 20 MB)`);
+    }
+    const info = (await this.call(token, "getFile", { file_id: item.fileId })) as {
+      file_path?: unknown;
+      file_size?: unknown;
+    };
+    const filePath = typeof info.file_path === "string" ? info.file_path : "";
+    if (filePath === "") {
+      throw new Error("telegram returned no file_path (file may exceed the 20 MB Bot API limit)");
+    }
+    const fileSize = typeof info.file_size === "number" ? info.file_size : item.size;
+    if (fileSize !== null && fileSize > BOT_FILE_LIMIT_BYTES) {
+      throw new Error(`file too large (${humanBytes(fileSize)}; Bot API limit is 20 MB)`);
+    }
+
+    mkdirSync(this.mediaDir(), { recursive: true });
+    const target = join(this.mediaDir(), mediaFileName(item, filePath));
+
+    const controller = new AbortController();
+    const watchdog = setTimeout(() => controller.abort(), DOWNLOAD_TIMEOUT_MS);
+    let response: Response;
+    try {
+      response = await this.fetchImpl(`${API_BASE}/file/bot${token}/${filePath}`, {
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(watchdog);
+    }
+    if (!response.ok) throw new Error(`download failed with HTTP ${response.status}`);
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    if (bytes.byteLength > BOT_FILE_LIMIT_BYTES) {
+      throw new Error(`download exceeded the 20 MB limit (${humanBytes(bytes.byteLength)})`);
+    }
+    writeFileSync(target, bytes);
+    return { path: target, bytes: bytes.byteLength };
   }
 
   private isSenderAllowed(senderId: string, username: string | undefined): boolean {

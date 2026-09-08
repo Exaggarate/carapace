@@ -32,6 +32,8 @@ export interface TelegramChannelConfig {
   /** Bot token from BotFather. Accepts a SecretRef; resolved at runtime, never logged. */
   botToken: SecretValue;
   allowedSenders: string[];
+  /** Where inbound photos/documents/voice are saved (tilde allowed). */
+  mediaDir: string;
 }
 
 export interface ApiChannelConfig {
@@ -167,7 +169,12 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
       timeoutMs: 120_000,
     },
     channels: {
-      telegram: { enabled: false, botToken: { env: "CARAPACE_TELEGRAM_TOKEN" }, allowedSenders: [] },
+      telegram: {
+        enabled: false,
+        botToken: { env: "CARAPACE_TELEGRAM_TOKEN" },
+        allowedSenders: [],
+        mediaDir: join(dir, "workspace", "media"),
+      },
       api: { enabled: true },
     },
     agent: {
@@ -332,6 +339,9 @@ export function validateConfig(raw: unknown): ValidationResult {
         errors,
         defaults.channels.telegram.allowedSenders,
       ),
+      mediaDir: expandTilde(
+        readString(telegramRaw, "mediaDir", "channels.telegram", errors, defaults.channels.telegram.mediaDir),
+      ),
     },
     api: { enabled: readBoolean(apiRaw, "enabled", "channels.api", errors, defaults.channels.api.enabled) },
   };
@@ -433,6 +443,9 @@ function applyEnvOverrides(config: CarapaceConfig, warnings: string[]): void {
 
   const telegramToken = env("TELEGRAM_TOKEN");
   if (telegramToken !== undefined) config.channels.telegram.botToken = telegramToken;
+
+  const mediaDir = env("MEDIA_DIR");
+  if (mediaDir !== undefined) config.channels.telegram.mediaDir = expandTilde(mediaDir);
 
   const apiEnabled = env("API_ENABLED");
   if (apiEnabled !== undefined) {
