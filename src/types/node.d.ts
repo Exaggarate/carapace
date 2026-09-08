@@ -15,6 +15,7 @@ declare module "node:http" {
 
   export interface ServerResponse {
     statusCode: number;
+    readonly headersSent: boolean;
     writeHead(status: number, headers?: Record<string, string>): void;
     end(body?: string | Uint8Array): void;
   }
@@ -113,6 +114,16 @@ declare class TextDecoder {
   constructor(encoding?: string);
   readonly encoding: string;
   decode(input?: Uint8Array | ArrayBuffer, options?: { stream?: boolean }): string;
+}
+
+declare class TextEncoder {
+  encode(input?: string): Uint8Array;
+}
+
+// --- crypto (constant-time secret comparison) ---
+
+declare module "node:crypto" {
+  export function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean;
 }
 
 // --- timers ---

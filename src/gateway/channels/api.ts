@@ -3,15 +3,43 @@
 //   POST /api/v1/messages  body: { "senderId": string, "text": string, "chatId"?: string }
 //   GET  /api/v1/channels  → channel status listing
 // Since M1 the message handler runs the real agent loop and replies in-band.
+// Since M2 the message endpoint requires bearer auth when gateway.apiToken is set.
 
-import type { IncomingMessage } from "node:http";
+import { timingSafeEqual } from "node:crypto";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import { respondJson, RouteTable } from "../server.js";
-import type { CarapaceConfig } from "../../config.js";
-import type { ChannelAdapter, MessageHandler } from "./types.js";
+import { resolveSecret, type CarapaceConfig } from "../../config.js";import type { ChannelAdapter, MessageHandler } from "./types.js";
 
 type BodyRead = { ok: true; value: unknown } | { ok: false; status: number; error: string };
 
 const MAX_BODY_BYTES = 1_048_576;
+
+/**
+ * Bearer-token check for API-channel endpoints. When gateway.apiToken resolves,
+ * requests must carry `Authorization: Bearer <token>` (constant-time compare).
+ * When no token is configured the channel runs open — bind it to localhost in
+ * that case; `carapace doctor` names the mode.
+ */
+export function requestAuthorized(config: CarapaceConfig, request: IncomingMessage): boolean {
+  const expected = resolveSecret(config.gateway.apiToken);
+  if (expected === null) return true;
+  const header = request.headers.authorization;
+  const match = /^Bearer (.+)$/s.exec(typeof header === "string" ? header : "");
+  if (match === null) return false;
+  const encoder = new TextEncoder();
+  const provided = encoder.encode(match[1]);
+  const required = encoder.encode(expected);
+  if (provided.byteLength === 0 || provided.byteLength !== required.byteLength) return false;
+  return timingSafeEqual(provided, required);
+}
+
+function respondUnauthorized(response: ServerResponse): void {
+  response.writeHead(401, {
+    "content-type": "application/json; charset=utf-8",
+    "www-authenticate": 'Bearer realm="carapace-api"',
+  });
+  response.end(JSON.stringify({ error: "unauthorized" }));
+}
 
 async function readJsonBody(request: IncomingMessage): Promise<BodyRead> {
   const decoder = new TextDecoder();
@@ -55,7 +83,8 @@ export class ApiChannel implements ChannelAdapter {
   }
 
   describe(): string {
-    return `enabled=${this.config.channels.api.enabled}, endpoint=POST /api/v1/messages (agent loop live)`;
+    const auth = resolveSecret(this.config.gateway.apiToken) === null ? "open (no gateway.apiToken)" : "bearer-token";
+    return `enabled=${this.config.channels.api.enabled}, endpoint=POST /api/v1/messages (agent loop live), auth=${auth}`;
   }
 
   onMessage(handler: MessageHandler): void {
@@ -76,6 +105,10 @@ export class ApiChannel implements ChannelAdapter {
 
   mountRoutes(routes: RouteTable): void {
     routes.add("POST", "/api/v1/messages", async (request, response) => {
+      if (!requestAuthorized(this.config, request)) {
+        respondUnauthorized(response);
+        return;
+      }
       if (!this.isConfigured()) {
         respondJson(response, 503, { error: "channel_disabled" });
         return;

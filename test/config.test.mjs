@@ -35,6 +35,7 @@ test("validateConfig defaults: gateway port 8899, llm + telegram botToken presen
   const result = validateConfig({});
   assert.equal(result.errors.length, 0);
   assert.equal(result.config.gateway.port, 8899);
+  assert.ok(isSecretRef(result.config.gateway.apiToken));
   assert.ok(result.config.llm.baseURL.includes("http"));
   assert.ok(isSecretRef(result.config.llm.apiKey));
   assert.ok(result.config.llm.model.length > 0);

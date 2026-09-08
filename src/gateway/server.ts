@@ -74,7 +74,14 @@ export async function startGatewayServer(options: GatewayServerOptions): Promise
     }
     const handler = routes.match(method, path);
     if (handler !== undefined) {
-      void handler(request, response);
+      // A handler that throws must still end the response — never leave a socket open.
+      void Promise.resolve(handler(request, response)).catch((error: unknown) => {
+        if (response.headersSent) {
+          response.end();
+          return;
+        }
+        respondJson(response, 500, { error: "internal_error", detail: (error as Error).message });
+      });
       return;
     }
     respondJson(response, 404, { error: "not_found", path });

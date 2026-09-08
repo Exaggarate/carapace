@@ -19,6 +19,12 @@ export type SecretValue = string | SecretRef;
 export interface GatewayConfig {
   host: string;
   port: number;
+  /**
+   * Bearer token required on API-channel endpoints. Accepts a SecretRef; resolved
+   * at runtime, never logged. When no token resolves, the API channel runs open
+   * (bind it to localhost in that case) and doctor flags it.
+   */
+  apiToken: SecretValue;
 }
 
 export interface TelegramChannelConfig {
@@ -125,6 +131,8 @@ export function isSecretRef(value: unknown): value is SecretRef {
  * callers decide whether that is fatal. Values are never logged by this module.
  */
 export function resolveSecret(value: SecretValue): string | null {
+  // Defensive: hand-built configs (tests) may omit the key entirely.
+  if (value === undefined || value === null) return null;
   if (typeof value === "string") return value.trim() === "" ? null : value;
   if ("env" in value) {
     const fromEnv = process.env[value.env];
@@ -150,6 +158,7 @@ export function defaultConfig(dir: string = carapaceHome()): CarapaceConfig {
       // Default 8899: 8787 is frequently occupied by unrelated services on shared
       // hosts. Override via config or CARAPACE_GATEWAY_PORT.
       port: 8899,
+      apiToken: { env: "CARAPACE_API_TOKEN" },
     },
     llm: {
       baseURL: "https://api.openai.com/v1",
@@ -298,6 +307,7 @@ export function validateConfig(raw: unknown): ValidationResult {
   const gateway: GatewayConfig = {
     host: readString(gatewayRaw, "host", "gateway", errors, defaults.gateway.host),
     port: readPort(gatewayRaw, "gateway", errors, defaults.gateway.port),
+    apiToken: readSecretValue(gatewayRaw, "apiToken", "gateway", errors, defaults.gateway.apiToken),
   };
 
   const channelsRaw = asObjectOrEmpty(root.channels, "channels", errors);
@@ -399,6 +409,9 @@ function applyEnvOverrides(config: CarapaceConfig, warnings: string[]): void {
     if (Number.isInteger(port) && port >= 1 && port <= 65535) config.gateway.port = port;
     else warnings.push(`ignoring ${ENV_PREFIX}GATEWAY_PORT="${portText}" — not an integer between 1 and 65535`);
   }
+
+  const apiToken = env("API_TOKEN");
+  if (apiToken !== undefined) config.gateway.apiToken = apiToken;
 
   const llmBaseUrl = env("LLM_BASE_URL");
   if (llmBaseUrl !== undefined) config.llm.baseURL = llmBaseUrl;
