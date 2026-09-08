@@ -1,6 +1,6 @@
 # OUR-FORK.md — The Fixed Edition
 
-This is **Exaggarate/openclaw** — a maintained fork of [openclaw/openclaw](https://github.com/openclaw/openclaw) (MIT, © OpenClaw Foundation). Not affiliated with upstream. Upstream main is merged continuously; this fork layers issue-driven fixes on top.
+This is **Exaggarate/openclaw** — our standalone edition of [openclaw/openclaw](https://github.com/openclaw/openclaw) (MIT, © OpenClaw Foundation). Not affiliated with upstream; independent repo, **not a GitHub fork**. Upstream main is merged continuously; this repo layers issue-driven fixes on top.
 
 ## Mission
 
