@@ -16,6 +16,8 @@ export interface ToolInputSchema {
 export interface ToolContext {
   sessionId: string;
   workdir: string;
+  /** Workspace root holding memory/ + MEMORY.md (memory tools, M9); absent = disabled. */
+  memoryWorkspace?: string;
 }
 
 export interface ToolResult {

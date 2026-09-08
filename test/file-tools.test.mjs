@@ -98,5 +98,5 @@ test("loadFileToolDefs is pure and doctor-safe; the builtins-only registry skips
 
   const builtinOnly = createBuiltinToolRegistry(makeConfig());
   assert.equal(builtinOnly.has("greet"), false);
-  assert.deepEqual(builtinOnly.names(), ["exec", "files", "web_fetch"]);
+  assert.deepEqual(builtinOnly.names(), ["exec", "files", "memory_read", "memory_write", "web_fetch"]);
 });

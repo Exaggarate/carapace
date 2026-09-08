@@ -12,33 +12,36 @@ opposite: the operator (you) owns the machine, the config, the secrets, and the 
 accounts. The gateway's job is to connect those chats to an agent loop with tools —
 reliably, transparently, and without phoning home.
 
-## Architecture at M7
+## Architecture at M9
 
 ```
 src/
-├── cli/index.ts          carapace gateway | doctor | models | skills | version | help
+├── cli/index.ts          carapace gateway | doctor | models | skills | automations | version | help
 ├── config.ts             ~/.carapace/config.json loader, CARAPACE_* overrides, SecretRef
 ├── core/
 │   ├── agent.ts          agent loop: LLM → tool exec → iterate (defensive tool handling)
 │   ├── llm.ts            provider re-exports (implementations live under llm/providers/)
 │   ├── llm/providers/    openai · anthropic (/v1/messages) · ollama · fallback chain (M7)
+│   ├── memory.ts         plain-file memory: daily notes + MEMORY.md + tools (M9)
+│   ├── schedule.ts       schedule math: at / every / 5-field cron + next-run (M8)
 │   ├── skills.ts         skill playbooks: SKILL.md scan, change-watch, context index (M7)
 │   ├── session.ts        SessionStore: identity, history, context assembly, deletion
 │   └── tools/
 │       ├── registry.ts   tool registry + OpenAI function specs
 │       ├── custom.ts     file-defined tools (~/.carapace/tools) + once-only setup hooks
-│       └── builtins/     exec (timeout + denylist), files (root confinement), web_fetch
+│       └── builtins/     exec (timeout + denylist), files, web_fetch, memory read/write
 ├── gateway/
 │   ├── server.ts         node:http server, /health, route table (500-on-throw)
 │   ├── runtime.ts        wiring, per-chat busy gate, waitUntilIdle, offset adapter
 │   ├── dashboard.ts      GET /ui single-page dashboard + theme system (#28300)
 │   ├── plugins.ts        plugin-UI loader: manifest scan + panel routes (#66944)
+│   ├── scheduler.ts      automations: due-job tick loop, catch-up, delivery (M8)
 │   └── channels/
 │       ├── types.ts      ChannelAdapter contract, BusyTurnError, SessionDirectory
 │       ├── telegram.ts   long-poll adapter: commands, media, business (#20786), offsets, drain
 │       ├── discord.ts    gateway WS adapter: identify, heartbeat, resume, REST sender (M6)
 │       └── api.ts        HTTP channel: POST /api/v1/messages, GET /api/v1/sessions
-├── storage/sqlite.ts     node:sqlite store (sessions, messages, channel_state; WAL)
+├── storage/sqlite.ts     node:sqlite store (sessions, messages, channel_state, automations; WAL)
 └── types/node.d.ts       hand-rolled ambient types (keeps devDeps to typescript only)
 
 plugins/                 bundled plugin-UI extensions (system-info example, #66944)
@@ -375,6 +378,8 @@ message customers are instead authorized by their active business connection.
 | ui.theme | dark (dark · light · lobster-red · carapace-amber · custom) | CARAPACE_UI_THEME |
 | ui.themeFile | ~/.carapace/theme.css | — |
 | ui.pluginsDir | — (bundled `<package>/plugins` + `~/.carapace/plugins` are always scanned) | — |
+| automations.enabled | true | CARAPACE_AUTOMATIONS_ENABLED |
+| automations.tickMs | 30000 (1000–3600000) | CARAPACE_AUTOMATIONS_TICK_MS |
 
 `CARAPACE_HOME` relocates the entire config/state directory (handy for tests). The M0-era
 `channels.telegram.token` key is still accepted as an alias for `botToken`.
@@ -470,6 +475,53 @@ one did (`[llm] turn served by provider "…"`). `carapace models` prints the wh
 }
 ```
 
+## Automations (M8)
+
+Scheduled jobs live in SQLite (`automations` table) and fire inside the gateway:
+
+- Three schedule kinds: `at` (one-shot, ISO 8601), `every` (fixed interval — `30s`, `5m`,
+  `2h`, `1d`), and `cron` (5-field crontab, minute granularity, server-local time).
+- A tick loop (default every 30s, `automations.tickMs`) claims due jobs with an atomic
+  `last_run` guard, runs the agent loop with the job's prompt, and delivers the reply to
+  the target chat via the channel adapter named in the job.
+- Restart-safe: missed one-shots fire once on boot; recurring jobs skip missed intervals
+  (phase-preserving advance) instead of backfilling; a job can never fire twice for the
+  same scheduled time — not across overlapping ticks, not across restarts.
+- Job history persists in the `automation:<jobId>` session; every job records a state
+  (idle / running / ok / done / error) plus the last error.
+
+```
+carapace automations list
+ carapace automations add (--at ISO | --every DURATION | --cron "M H DOM MON DOW") \
+     --prompt TEXT --chat CHANNEL:CHATID [--channel CHANNEL] [--name NAME]
+carapace automations remove <id|name>   # id, name, or unique id prefix
+carapace automations run <id|name>      # fire now (real provider + real channels)
+```
+
+Targets use `CHANNEL:CHATID` (e.g. `telegram:12345`). Delivery requires a push-capable,
+configured channel (telegram, discord — the api channel replies in-band and cannot be
+pushed); failures set the job state to `error` with the reason and the job retries on its
+next scheduled slot.
+
+## Memory (M9)
+
+Plain files under `~/.carapace/workspace/` — memory survives restarts by construction:
+
+- `memory/YYYY-MM-DD.md` — daily notes, created with a `# <date>` header on first write
+- `MEMORY.md` — long-term facts
+
+At every agent turn the system prompt gains a "Persistent memory" block: today's daily
+note (last 60 lines) plus the long-term digest (first 150 lines). Nothing is injected on
+a fresh install until a file exists. The agent reads and writes memory through two
+built-in tools:
+
+- `memory_read` — today's note (default), a dated note (`YYYY-MM-DD.md`), or `MEMORY.md`
+- `memory_write` — append to the daily note (default) or `MEMORY.md` (`target: "longterm"`)
+
+Both tools resolve only bare file names inside the memory workspace — path traversal is
+rejected. `carapace doctor` probes the memory directory for writability and reports note
+counts.
+
 ## Doctor checks
 
 `carapace doctor` reports and exits 0 when healthy:
@@ -496,6 +548,10 @@ one did (`[llm] turn served by provider "…"`). `carapace models` prints the wh
 14. channel:discord — enabled/token resolution (disabled channels are reported, not
     failed); with a resolvable token, `channel:discord-gateway` probes REST
     `GET /users/@me` — a rejected token (401) FAILs, an unreachable gateway WARNs
+15. scheduler — persisted automations: total/enabled counts and the next due job;
+    overdue jobs are noted (they fire on the next tick)
+16. memory — `~/.carapace/workspace/memory` writable (write-probe), daily note count,
+    today's note size, MEMORY.md line count
 
 Disabled-by-config channels are reported, not failed — a default install with only the
 API channel enabled is healthy. Note: `node:sqlite` prints an upstream
@@ -509,6 +565,9 @@ API channel enabled is healthy. Note: `node:sqlite` prints an upstream
   delete (assistant tool calls persist as JSON and round-trip losslessly)
 - `channel_state(key, value, updated_at)` — channel bookkeeping: the Telegram
   update-offset frontier and the persisted Telegram business-connection map
+- `automations(id, name, kind, spec, prompt, channel, chat_id, enabled, last_run, next_run,
+  state, last_error, created_at, updated_at)` — scheduled jobs (M8); each fire is claimed
+  atomically with the `last_run` guard so a job never fires twice for the same due time
 
 All tables are created idempotently on open; post-M0 columns are migrated in place, so
 pre-M1 databases keep working.
@@ -539,10 +598,16 @@ pre-M1 databases keep working.
   `/v1/messages` with tool_use mapping) | `ollama` (local OpenAI-compatible), the
   `llm.fallbacks[]` serving chain with per-turn provider logging, and per-provider doctor
   checks.
-- **M8/M9 (planned):** automations/scheduler (recurring + timed jobs), then a memory
-  system. After that: WhatsApp (needs a Meta Business API vs unofficial-bridge design
+- **M8 (done):** automations/scheduler — SQLite `automations` table, gateway tick loop
+  (default 30s), `at`/`every`/5-field `cron` schedules with minute granularity, atomic
+  last_run claim (no duplicate fires across ticks or restarts), missed one-shots fire
+  once on boot, `carapace automations list|add|remove|run`, doctor check.
+- **M9 (done):** memory system — plain files under `~/.carapace/workspace/`
+  (`memory/YYYY-MM-DD.md` daily notes + `MEMORY.md`), a daily-tail + long-term digest
+  injected into every system prompt, `memory_read`/`memory_write` tools, doctor check.
+- **Next:** WhatsApp (needs a Meta Business API vs unofficial-bridge design
   decision), a third-party plugin interface (tool injection + lifecycle hooks), richer
-  dashboard write actions.
+  dashboard write actions (including automations management).
 
 ## Conventions
 

@@ -8,6 +8,7 @@ import { ToolRegistry } from "../registry.js";
 import { fileToolsDir, fileToolDefinition, loadFileToolDefs, runSetupOnce } from "../custom.js";
 import { createExecTool } from "./exec.js";
 import { createFilesTool } from "./files.js";
+import { createMemoryReadTool, createMemoryWriteTool } from "./memory.js";
 import { createWebFetchTool } from "./web-fetch.js";
 
 /**
@@ -27,6 +28,10 @@ export function createBuiltinToolRegistry(config: CarapaceConfig): ToolRegistry 
   );
   registry.register(createFilesTool({ allowedRoots }));
   registry.register(createWebFetchTool());
+  // Memory tools (M9): pure context consumers — they no-op safely when the
+  // runtime has no memory workspace injected into ToolContext.
+  registry.register(createMemoryReadTool());
+  registry.register(createMemoryWriteTool());
   return registry;
 }
 

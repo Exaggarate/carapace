@@ -1,7 +1,9 @@
 // Gateway runtime assembly: config → provider + tools + session store + channels.
 // Shared by the CLI, tests, and future entry points so there is exactly one wiring.
 
+import { join } from "node:path";
 import {
+  carapaceHome,
   describeSecretValue,
   resolveSecret,
   resolveSenderRoute,
@@ -10,6 +12,7 @@ import {
   type SecretValue,
 } from "../config.js";
 import { runAgentTurn, type AgentRuntime, type ChatProvider } from "../core/agent.js";
+import { MemoryStore } from "../core/memory.js";
 import { AnthropicProvider } from "../core/llm/providers/anthropic.js";
 import { FallbackProvider } from "../core/llm/providers/fallback.js";
 import { OllamaLocalProvider } from "../core/llm/providers/ollama.js";
@@ -41,6 +44,8 @@ export interface RuntimeOptions {
   providerForModel?: (model: string) => ChatProvider;
   /** Skills registry (M7): its index is appended to every turn's system prompt. */
   skills?: SkillRegistry;
+  /** Memory store (M9); defaults to ~/.carapace/workspace (memory/ + MEMORY.md). */
+  memory?: MemoryStore;
 }
 
 /** A message waiting for its chat's turn, with the promise it must settle. */
@@ -216,6 +221,8 @@ export function buildRuntime(options: RuntimeOptions): GatewayRuntime {
     tools: createBuiltinTools(config),
     sessions: new SessionStore(store),
     skills: options.skills,
+    // Memory (M9): plain files under the workspace — injectable for tests.
+    memory: options.memory ?? new MemoryStore(join(carapaceHome(), "workspace")),
   };
 
   // Per-sender model overrides (#81271): providers are built lazily per model

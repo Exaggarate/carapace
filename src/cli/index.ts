@@ -26,6 +26,7 @@ import { createBuiltinToolRegistry } from "../core/tools/builtins/index.js";
 import { fileToolsDir, loadFileToolDefs } from "../core/tools/custom.js";
 import { probeProviderEndpoint, type ProviderProbeResult } from "../core/llm.js";
 import { nextRunMs, parseSchedule, ScheduleError } from "../core/schedule.js";
+import { MemoryStore, todayIsoDate } from "../core/memory.js";
 import { carapaceSkillsDir, loadSkillsFromDir, SkillRegistry } from "../core/skills.js";
 import { CarapaceStore, type AutomationRow } from "../storage/sqlite.js";
 import { VERSION } from "../version.js";
@@ -456,6 +457,32 @@ async function commandDoctor(): Promise<number> {
         name: "scheduler",
         status: "warn",
         detail: `could not inspect automations: ${(error as Error).message}`,
+      });
+    }
+
+    // Memory (M9): plain files under the workspace — writable dirs, parseable notes.
+    try {
+      const memory = new MemoryStore(join(home, "workspace"));
+      memory.ensureDirs();
+      const probePath = join(memory.memoryDir, ".doctor-probe");
+      writeFileSync(probePath, "ok", "utf8");
+      unlinkSync(probePath);
+      const notes = memory.listDailyNotes();
+      const todayNote = memory.readDaily(todayIsoDate());
+      const longTerm = memory.readLongTerm();
+      results.push({
+        name: "memory",
+        status: "ok",
+        detail:
+          `${memory.memoryDir} writable — ${notes.length} daily note(s), ` +
+          `today: ${todayNote === null ? "none yet" : `${todayNote.length} chars`}, ` +
+          `MEMORY.md: ${longTerm === null ? "absent" : `${longTerm.split("\n").length} lines`}`,
+      });
+    } catch (error) {
+      results.push({
+        name: "memory",
+        status: "fail",
+        detail: `memory check failed: ${(error as Error).message}`,
       });
     }
   }

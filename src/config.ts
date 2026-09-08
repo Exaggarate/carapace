@@ -870,6 +870,19 @@ function applyEnvOverrides(config: CarapaceConfig, warnings: string[]): void {
     else warnings.push(`ignoring ${ENV_PREFIX}BUSY_QUEUE_LIMIT="${busyQueueLimit}" — not an integer between 1 and 100`);
   }
 
+  const automationsEnabled = env("AUTOMATIONS_ENABLED");
+  if (automationsEnabled !== undefined) {
+    const flag = parseEnvBoolean(`${ENV_PREFIX}AUTOMATIONS_ENABLED`, automationsEnabled, warnings);
+    if (flag !== null) config.automations.enabled = flag;
+  }
+
+  const automationsTickMs = env("AUTOMATIONS_TICK_MS");
+  if (automationsTickMs !== undefined) {
+    const parsed = Number.parseInt(automationsTickMs, 10);
+    if (Number.isInteger(parsed) && parsed >= 1_000 && parsed <= 3_600_000) config.automations.tickMs = parsed;
+    else warnings.push(`ignoring ${ENV_PREFIX}AUTOMATIONS_TICK_MS="${automationsTickMs}" — not an integer between 1000 and 3600000`);
+  }
+
   const llmBaseUrl = env("LLM_BASE_URL");
   if (llmBaseUrl !== undefined) config.llm.baseURL = llmBaseUrl;
 

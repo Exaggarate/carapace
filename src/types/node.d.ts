@@ -42,6 +42,7 @@ declare module "node:fs" {
   export function mkdirSync(path: string, options?: { recursive?: boolean }): string | undefined;
   export function readFileSync(path: string, encoding: "utf8"): string;
   export function writeFileSync(path: string, data: string | Uint8Array, encoding?: string): void;
+  export function appendFileSync(path: string, data: string, encoding?: string): void;
   export function unlinkSync(path: string): void;
   export function readdirSync(path: string): string[];
   export interface Dirent {

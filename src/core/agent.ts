@@ -3,6 +3,7 @@
 // Context comes from the SessionStore; tools execute through the ToolRegistry.
 
 import { carapaceHome, type CarapaceConfig } from "../config.js";
+import type { MemoryStore } from "./memory.js";
 import type { SessionStore } from "./session.js";
 import type { SkillRegistry } from "./skills.js";
 import type { ToolContext, ToolRegistry, ToolResult, ToolSpec } from "./tools/registry.js";
@@ -74,6 +75,8 @@ export interface AgentRuntime {
   sessions: SessionStore;
   /** Installed skill playbooks (M7); their index is appended to the system prompt. */
   skills?: SkillRegistry;
+  /** Plain-file memory (M9); its daily tail + long-term digest enter every system prompt. */
+  memory?: MemoryStore;
 }
 
 export interface AgentTurnInput {
@@ -240,9 +243,12 @@ export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime)
 
   // Skills (M7): append the registry's "available skills" block to the system prompt
   // so the agent knows which playbooks exist and where each SKILL.md lives.
+  // Memory (M9): today's daily-note tail + long-term digest join the same prompt.
   const skillsBlock = runtime.skills?.systemContextBlock() ?? null;
-  const systemPrompt =
-    skillsBlock === null ? config.agent.systemPrompt : `${config.agent.systemPrompt}\n\n${skillsBlock}`;
+  const memoryBlock = runtime.memory?.contextBlock() ?? null;
+  let systemPrompt = config.agent.systemPrompt;
+  if (skillsBlock !== null) systemPrompt += `\n\n${skillsBlock}`;
+  if (memoryBlock !== null) systemPrompt += `\n\n${memoryBlock}`;
 
   // Turn budget + stall watchdog (#68596): llm.turnTimeoutMs bounds the whole turn,
   // llm.watchdogTimeoutSec aborts a single provider call that never completes.
@@ -292,7 +298,7 @@ export async function runAgentTurn(input: AgentTurnInput, runtime: AgentRuntime)
 
     if (completion.toolCalls.length > 0) {
       sessions.appendAssistant(sessionId, completion.text, completion.toolCalls);
-      const context: ToolContext = { sessionId, workdir };
+      const context: ToolContext = { sessionId, workdir, memoryWorkspace: runtime.memory?.workspaceDir };
       for (const call of completion.toolCalls) {
         const result = await executeToolCall(tools, call, context, turnDeadline ?? undefined);
         toolCallsExecuted += 1;
