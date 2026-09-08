@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.tsbuildinfo
+*.log
+
+# runtime data (lives in ~/.carapace by default; ignore it if pointed into the repo)
+.carapace/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.env

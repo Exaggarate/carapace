@@ -1,0 +1,28 @@
+{
+  "name": "carapace",
+  "version": "0.1.0",
+  "description": "Independent, multi-channel AI agent gateway — your assistant, your hardware, your chats.",
+  "type": "module",
+  "bin": {
+    "carapace": "dist/cli/index.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "doctor": "node dist/cli/index.js doctor",
+    "test": "npm run build && node --test test/*.test.mjs"
+  },
+  "keywords": [
+    "agent",
+    "gateway",
+    "telegram",
+    "assistant",
+    "self-hosted"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}
